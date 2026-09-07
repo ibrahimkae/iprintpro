@@ -21,8 +21,8 @@ import {
   Edit3,
   Settings2,
   ChevronLeft,
-  Share2,
-  Heart
+  Heart,
+  Maximize
 } from 'lucide-react';
 
 interface TemplateEditorModalProps {
@@ -55,19 +55,39 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const [heightMode, setHeightMode] = useState<'auto' | 'fixed'>(template?.heightMm ? 'fixed' : 'auto');
   const [fixedHeightMm, setFixedHeightMm] = useState<number>(template?.heightMm || 50);
   const [paperStyle, setPaperStyle] = useState<ThermalPaperStyle>(initialPaperStyle);
-  const [zoomScale, setZoomScale] = useState<number>(template?.recommendedWidthMm && template.recommendedWidthMm >= 100 ? 0.85 : 1.05);
+  const [zoomScale, setZoomScale] = useState<number>(0.9);
   const [copies, setCopies] = useState<number>(1);
   const [isSavedNotice, setIsSavedNotice] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [customTitle, setCustomTitle] = useState<string>(template ? `${template.title} (Özelleştirilmiş)` : '');
   
   // Mobile / Desktop active tabs
-  const [activeTab, setActiveTab] = useState<'preview' | 'fields' | 'dimensions' | 'advanced'>('fields');
-  // For mobile quick tab toggle
+  const [activeTab, setActiveTab] = useState<'fields' | 'dimensions' | 'advanced'>('fields');
+  // For mobile view switch
   const [mobileView, setMobileView] = useState<'preview' | 'fields' | 'dimensions' | 'advanced'>('preview');
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const exportCaptureRef = useRef<HTMLDivElement | null>(null);
+
+  const effectiveWidth = isCustomWidth ? customWidthMm : selectedWidthMm;
+  const effectiveHeight = heightMode === 'fixed' ? fixedHeightMm : undefined;
+
+  // Akıllı tam ekrana sığdırma ölçeği hesabı
+  const calculateAutoFitScale = (targetWidth: number, targetHeight?: number) => {
+    if (typeof window === 'undefined') return 0.85;
+    const isMobile = window.innerWidth < 768;
+    const availWidth = isMobile ? Math.max(260, window.innerWidth - 48) : 520;
+    const availHeight = isMobile ? Math.max(220, window.innerHeight * 0.42) : 520;
+
+    // Termal piksel genişliği tahmini (1mm ~ 8 dots)
+    const estWidthPx = targetWidth * 7.6;
+    const estHeightPx = (targetHeight || 65) * 7.6;
+
+    const scaleW = availWidth / estWidthPx;
+    const scaleH = availHeight / estHeightPx;
+    const fit = Math.min(scaleW, scaleH, 1.0);
+    return Math.max(0.35, parseFloat(fit.toFixed(2)));
+  };
 
   // Synchronize state faithfully when template opens
   useEffect(() => {
@@ -79,24 +99,16 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       setIsCustomWidth(false);
       setPaperStyle(initialPaperStyle);
       
-      if (template.heightMm) {
+      const targetHeight = template.heightMm;
+      if (targetHeight) {
         setHeightMode('fixed');
-        setFixedHeightMm(template.heightMm);
+        setFixedHeightMm(targetHeight);
       } else {
         setHeightMode('auto');
       }
 
-      if (targetWidth <= 57) {
-        setZoomScale(1.0);
-      } else if (targetWidth <= 80) {
-        setZoomScale(0.75);
-      } else if (targetWidth <= 100) {
-        setZoomScale(0.50);
-      } else {
-        setZoomScale(0.38);
-      }
+      setZoomScale(calculateAutoFitScale(targetWidth, targetHeight));
       setCustomTitle(`${template.title} (Özelleştirilmiş)`);
-      // Default to preview tab on mobile so user sees the card first, or fields if desired
       setMobileView('preview');
       setActiveTab('fields');
     }
@@ -113,6 +125,10 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
   const handleReset = () => {
     setFormData({ ...template.defaultData });
+  };
+
+  const handleFitToScreen = () => {
+    setZoomScale(calculateAutoFitScale(effectiveWidth, effectiveHeight));
   };
 
   const handlePrint = async () => {
@@ -158,26 +174,24 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     }
   };
 
-
   const handleSaveCustom = () => {
     onSaveAsCustom(template, customTitle, formData);
     setIsSavedNotice(true);
     setTimeout(() => setIsSavedNotice(false), 2500);
   };
 
-  const effectiveWidth = isCustomWidth ? customWidthMm : selectedWidthMm;
-  const effectiveHeight = heightMode === 'fixed' ? fixedHeightMm : undefined;
-
   // Responsive Form Fields View
   const renderFieldsTab = () => (
     <div className="space-y-4">
-      <div className="flex items-center justify-between pb-1 border-b border-[#2A2A2A]">
-        <span className="text-xs font-bold text-gray-300 uppercase tracking-wide">
-          Metin ve Barkod Düzenleme
+      <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+          <Sliders size={13} className="text-indigo-600 dark:text-indigo-400" />
+          <span>Şablon Alanları</span>
         </span>
         <button
+          type="button"
           onClick={handleReset}
-          className="text-xs text-gray-400 hover:text-white flex items-center gap-1 font-medium cursor-pointer"
+          className="text-xs text-slate-500 hover:text-indigo-600 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1 font-semibold cursor-pointer transition-colors"
         >
           <RotateCcw size={12} /> Varsayılana Dön
         </button>
@@ -188,7 +202,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
         return (
           <div key={field.key} className="space-y-1.5">
-            <label className="block text-xs font-bold text-gray-300">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
               {field.label}
             </label>
 
@@ -197,7 +211,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 type="text"
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                className="w-full px-3 py-2.5 sm:py-2 text-xs rounded-xl border border-[#2A2A2A] bg-[#222] text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-mono"
+                className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 font-medium transition-colors"
               />
             )}
 
@@ -208,9 +222,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   value={value || ''}
                   onChange={(e) => handleFieldChange(field.key, e.target.value)}
                   placeholder="Örn: 8690123456789"
-                  className="w-full px-3 py-2.5 sm:py-2 text-xs rounded-xl border border-blue-500/40 bg-blue-950/20 text-blue-200 focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono font-bold"
+                  className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-indigo-200 dark:border-indigo-800/80 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-950 dark:text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-bold transition-colors"
                 />
-                <p className="text-[10px] text-gray-500">Değer değiştiğinde barkod anında güncellenir.</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">Değer değiştikçe barkod otomatik güncellenir.</p>
               </div>
             )}
 
@@ -221,9 +235,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   value={value || ''}
                   onChange={(e) => handleFieldChange(field.key, e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-3 py-2.5 sm:py-2 text-xs rounded-xl border border-indigo-500/40 bg-indigo-950/20 text-indigo-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+                  className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-teal-200 dark:border-teal-800/80 bg-teal-50/50 dark:bg-teal-950/30 text-teal-950 dark:text-teal-200 focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono transition-colors"
                 />
-                <p className="text-[10px] text-gray-500">Canlı QR Kod bağlantı URL veya metni.</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">Canlı QR Kod bağlantı veya metni.</p>
               </div>
             )}
 
@@ -232,7 +246,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 rows={3}
                 value={value || ''}
                 onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                className="w-full px-3 py-2 text-xs rounded-xl border border-[#2A2A2A] bg-[#222] text-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-mono leading-relaxed"
+                className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-medium leading-relaxed transition-colors"
               />
             )}
 
@@ -240,10 +254,10 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               <select
                 value={value}
                 onChange={(e) => handleFieldChange(field.key, e.target.value)}
-                className="w-full px-3 py-2.5 sm:py-2 text-xs rounded-xl border border-[#2A2A2A] bg-[#222] text-white focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold"
+                className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-bold transition-colors"
               >
                 {field.options?.map((opt) => (
-                  <option key={opt} value={opt} className="bg-[#222] text-white">
+                  <option key={opt} value={opt}>
                     {opt}
                   </option>
                 ))}
@@ -256,9 +270,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   type="checkbox"
                   checked={!!value}
                   onChange={(e) => handleFieldChange(field.key, e.target.checked)}
-                  className="w-4 h-4 rounded bg-[#222] border-[#2A2A2A] text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  className="w-4 h-4 rounded bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                 />
-                <span className="text-xs text-gray-300 select-none">Etikette bu sembolleri göster</span>
+                <span className="text-xs text-slate-700 dark:text-slate-300 select-none">Etikette bu sembolleri göster</span>
               </label>
             )}
           </div>
@@ -271,12 +285,12 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const renderDimensionsTab = () => (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wide mb-2 flex items-center justify-between">
+        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2 flex items-center justify-between">
           <span>Standart Ölçü Şablonları</span>
-          <span className="text-[10px] text-blue-400 font-normal">Hızlı Seçim</span>
+          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">Hızlı Seçim</span>
         </h3>
-        <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-          Şablon seçilen genişlik ve yüksekliğe otomatik uyarlanır.
+        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
+          Şablon seçilen kağıt genişliğine göre otomatik uyarlanır.
         </p>
 
         <div className="grid grid-cols-2 gap-2">
@@ -289,6 +303,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             return (
               <button
                 key={dim.id}
+                type="button"
                 onClick={() => {
                   setIsCustomWidth(false);
                   setSelectedWidthMm(dim.widthMm);
@@ -299,22 +314,23 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   } else {
                     setHeightMode('auto');
                   }
+                  setZoomScale(calculateAutoFitScale(dim.widthMm, dim.heightMm));
                 }}
                 className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-blue-500 bg-blue-600 text-white shadow-md'
-                    : 'border-[#2A2A2A] bg-[#222] hover:border-[#3A3A3A] text-gray-300'
+                    ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
+                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300'
                 }`}
               >
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-xs">{dim.name}</span>
-                  <span className={`text-[9.5px] px-1.5 py-0.2 rounded font-mono ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-[#181818] text-gray-400'
+                  <span className={`text-[9.5px] px-1.5 py-0.5 rounded font-mono ${
+                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                   }`}>
                     {dim.badge}
                   </span>
                 </div>
-                <p className={`text-[10px] mt-1 line-clamp-1 ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                <p className={`text-[10px] mt-1 line-clamp-1 ${isSelected ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'}`}>
                   {dim.description}
                 </p>
               </button>
@@ -324,10 +340,10 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       </div>
 
       {/* Custom Width Slider */}
-      <div className="p-3.5 bg-[#222] rounded-2xl border border-[#2A2A2A] space-y-3">
+      <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-gray-200 flex items-center gap-1.5">
-            <Sliders size={14} className="text-blue-400" />
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <Sliders size={14} className="text-indigo-600 dark:text-indigo-400" />
             Genişlik (En) Ayarı
           </label>
           <div className="flex items-center gap-1">
@@ -341,9 +357,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                 setCustomWidthMm(val);
                 setIsCustomWidth(true);
               }}
-              className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-black border border-[#333] rounded text-white"
+              className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white"
             />
-            <span className="font-mono text-xs text-gray-400">mm</span>
+            <span className="font-mono text-xs text-slate-500">mm</span>
           </div>
         </div>
 
@@ -358,22 +374,24 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             setCustomWidthMm(val);
             setIsCustomWidth(true);
           }}
-          className="w-full accent-blue-600 cursor-pointer"
+          className="w-full accent-indigo-600 cursor-pointer"
         />
 
         <div className="flex items-center gap-1.5">
           {[57, 80, 100, 150].map((w) => (
             <button
               key={w}
+              type="button"
               onClick={() => {
                 setCustomWidthMm(w);
                 setSelectedWidthMm(w);
                 setIsCustomWidth(false);
+                setZoomScale(calculateAutoFitScale(w, effectiveHeight));
               }}
               className={`flex-1 py-1 rounded-lg text-[10px] font-mono font-bold border transition-colors cursor-pointer ${
                 effectiveWidth === w
-                  ? 'bg-blue-600 text-white border-blue-500'
-                  : 'bg-[#181818] text-gray-400 border-[#2A2A2A] hover:text-white'
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               {w} mm
@@ -383,53 +401,61 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       </div>
 
       {/* Height / Uzunluk Kontrolü */}
-      <div className="p-3.5 bg-[#222] rounded-2xl border border-[#2A2A2A] space-y-3">
+      <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
         <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-gray-200 flex items-center gap-1.5">
-            <Layers size={14} className="text-blue-400" />
-            Uzunluk & Boyut Davranışı
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+            <Layers size={14} className="text-indigo-600 dark:text-indigo-400" />
+            Uzunluk Davranışı
           </label>
-          <span className="text-[10px] text-gray-400 font-mono">
+          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
             {heightMode === 'auto' ? 'Kompakt Rulo' : `${fixedHeightMm} mm`}
           </span>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button
-            onClick={() => setHeightMode('auto')}
+            type="button"
+            onClick={() => {
+              setHeightMode('auto');
+              setZoomScale(calculateAutoFitScale(effectiveWidth, undefined));
+            }}
             className={`p-2 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-0.5 cursor-pointer ${
               heightMode === 'auto'
-                ? 'bg-blue-600 text-white border-blue-500 shadow-md'
-                : 'bg-[#181818] border-[#2A2A2A] text-gray-400 hover:bg-[#252525]'
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <span className="flex items-center gap-1 text-[11px] sm:text-xs">
               <Minimize2 size={13} />
-              Otomatik Kompakt
+              Otomatik Rulo
             </span>
             <span className="text-[9px] opacity-80 font-normal">Boşluksuz</span>
           </button>
 
           <button
-            onClick={() => setHeightMode('fixed')}
+            type="button"
+            onClick={() => {
+              setHeightMode('fixed');
+              setZoomScale(calculateAutoFitScale(effectiveWidth, fixedHeightMm));
+            }}
             className={`p-2 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-0.5 cursor-pointer ${
               heightMode === 'fixed'
-                ? 'bg-blue-600 text-white border-blue-500 shadow-md'
-                : 'bg-[#181818] border-[#2A2A2A] text-gray-400 hover:bg-[#252525]'
+                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
           >
             <span className="flex items-center gap-1 text-[11px] sm:text-xs">
               <Maximize2 size={13} />
-              Manuel Sabit Boy
+              Sabit Boy
             </span>
             <span className="text-[9px] opacity-80 font-normal">{fixedHeightMm} mm</span>
           </button>
         </div>
 
         {heightMode === 'fixed' && (
-          <div className="pt-2 space-y-2.5 border-t border-[#2A2A2A]">
+          <div className="pt-2 space-y-2.5 border-t border-slate-200 dark:border-slate-800">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-gray-300 font-medium">Sabit Uzunluk:</span>
+              <span className="text-slate-600 dark:text-slate-300 font-medium">Sabit Uzunluk:</span>
               <div className="flex items-center gap-1">
                 <input
                   type="number"
@@ -437,9 +463,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
                   max="250"
                   value={fixedHeightMm}
                   onChange={(e) => setFixedHeightMm(parseInt(e.target.value, 10) || 50)}
-                  className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-black border border-[#333] rounded text-white"
+                  className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white"
                 />
-                <span className="font-mono text-xs text-gray-400">mm</span>
+                <span className="font-mono text-xs text-slate-500">mm</span>
               </div>
             </div>
 
@@ -450,18 +476,19 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
               step="5"
               value={fixedHeightMm}
               onChange={(e) => setFixedHeightMm(parseInt(e.target.value, 10))}
-              className="w-full accent-blue-600 cursor-pointer"
+              className="w-full accent-indigo-600 cursor-pointer"
             />
 
             <div className="flex items-center gap-1">
-              {[30, 50, 75, 100, 150, 200].map((h) => (
+              {[30, 50, 75, 100, 150].map((h) => (
                 <button
                   key={h}
+                  type="button"
                   onClick={() => setFixedHeightMm(h)}
                   className={`flex-1 py-1 rounded-md text-[9px] font-mono font-bold border transition-colors cursor-pointer ${
                     fixedHeightMm === h
-                      ? 'bg-blue-600 text-white border-blue-500'
-                      : 'bg-[#181818] text-gray-400 border-[#2A2A2A] hover:text-white'
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   {h}
@@ -478,22 +505,24 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const renderAdvancedTab = () => (
     <div className="space-y-4">
       <div>
-        <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wide mb-2">
-          Baskı Ayarları & Adet
+        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2">
+          Baskı Adedi
         </h3>
         <div className="flex items-center gap-3">
-          <label className="text-xs text-gray-400 font-medium">Kopya Sayısı:</label>
-          <div className="flex items-center border border-[#2A2A2A] rounded-xl overflow-hidden bg-[#222]">
+          <label className="text-xs text-slate-500 dark:text-slate-400 font-medium">Kopya Sayısı:</label>
+          <div className="flex items-center border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
             <button
+              type="button"
               onClick={() => setCopies((c) => Math.max(1, c - 1))}
-              className="px-3.5 py-2 text-gray-300 hover:bg-[#333] font-bold cursor-pointer text-sm"
+              className="px-3.5 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold cursor-pointer text-sm"
             >
               -
             </button>
-            <span className="px-4 py-2 text-xs font-mono font-bold text-white">{copies}</span>
+            <span className="px-4 py-1.5 text-xs font-mono font-bold text-slate-900 dark:text-white">{copies}</span>
             <button
+              type="button"
               onClick={() => setCopies((c) => c + 1)}
-              className="px-3.5 py-2 text-gray-300 hover:bg-[#333] font-bold cursor-pointer text-sm"
+              className="px-3.5 py-1.5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 font-bold cursor-pointer text-sm"
             >
               +
             </button>
@@ -501,53 +530,55 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
       </div>
 
-      <div className="p-3.5 bg-blue-950/30 border border-blue-800/40 rounded-2xl text-xs space-y-1.5 text-blue-200">
-        <div className="font-bold flex items-center gap-1.5 text-blue-400">
+      <div className="p-3.5 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/60 rounded-2xl text-xs space-y-1.5 text-indigo-900 dark:text-indigo-200">
+        <div className="font-bold flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
           <Sparkles size={14} />
-          Termal Yazıcı Baskı İpucu:
+          Termal Yazıcı İpucu:
         </div>
         <p className="leading-relaxed text-[11px] opacity-90">
-          Yazdır butonuna bastığınızda tarayıcınızın Yazdırma penceresinde kağıt boyutunu <strong>{effectiveWidth}mm ({effectiveHeight ? `${effectiveHeight}mm` : 'Rulo'})</strong> olarak seçip kenar boşluklarını (Margins) <strong>"Yok / None"</strong> olarak ayarlayınız.
+          Yazdırırken tarayıcının veya sistemin yazdırma penceresinde kenar boşluklarını (Margins) <strong>"Yok / None"</strong> olarak seçiniz.
         </p>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-bold text-gray-300">Özel Şablon Adı</label>
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Özel Şablon Başlığı</label>
         <input
           type="text"
           value={customTitle}
           onChange={(e) => setCustomTitle(e.target.value)}
-          className="w-full px-3 py-2 text-xs rounded-xl border border-[#2A2A2A] bg-[#222] text-white font-medium focus:ring-1 focus:ring-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 text-[16px] sm:text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium focus:ring-1 focus:ring-indigo-500 focus:outline-none"
         />
       </div>
 
-      <div className="pt-2">
+      <div className="pt-1">
         <button
+          type="button"
           onClick={handleSaveCustom}
-          className="w-full py-2.5 rounded-xl bg-[#252525] hover:bg-[#333] border border-[#2A2A2A] text-gray-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
         >
-          {isSavedNotice ? <Check size={15} className="text-emerald-400" /> : <Save size={15} />}
-          {isSavedNotice ? 'Koleksiyona Kaydedildi!' : 'Bu Şablonu Özel Olarak Kaydet'}
+          {isSavedNotice ? <Check size={15} className="text-emerald-500" /> : <Save size={15} />}
+          {isSavedNotice ? 'Koleksiyonunuza Kaydedildi!' : 'Özel Olarak Kaydet'}
         </button>
       </div>
     </div>
   );
 
-  // Live Stage Component (used for both desktop and mobile preview tab)
+  // Live Stage Component (Önizleme alanı - Sayfaya tam sığar, asla taşma yapmaz)
   const renderPreviewStage = () => (
-    <div className="flex-1 bg-[#101010] p-2.5 sm:p-4 flex flex-col items-center justify-between overflow-hidden relative w-full h-full">
+    <div className="flex-1 bg-slate-100/80 dark:bg-slate-950 p-2 sm:p-3.5 flex flex-col items-center justify-between overflow-hidden relative w-full h-full">
       {/* Top Floating Toolbar */}
-      <div className="w-full max-w-lg bg-[#1C1C1C]/90 backdrop-blur-md px-3 py-1.5 sm:py-2 rounded-2xl border border-[#2A2A2A] shadow-md flex items-center justify-between mb-2 text-xs flex-wrap gap-1.5">
+      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex items-center justify-between mb-2 text-xs flex-wrap gap-1">
         <div className="flex items-center gap-1">
-          <span className="text-[10px] sm:text-[11px] font-bold text-gray-400 mr-0.5">Kağıt:</span>
+          <span className="text-[10px] font-bold text-slate-400 mr-0.5">Kağıt:</span>
           {(['standard', 'vintage', 'dither', 'invert'] as ThermalPaperStyle[]).map((style) => (
             <button
               key={style}
+              type="button"
               onClick={() => setPaperStyle(style)}
-              className={`px-2 py-0.5 sm:py-1 rounded-lg text-[9.5px] sm:text-[10px] font-bold uppercase transition-all cursor-pointer ${
+              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
                 paperStyle === style
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-gray-400 hover:text-white hover:bg-[#252525]'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
             >
               {style === 'standard' && 'Beyaz'}
@@ -558,20 +589,31 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center gap-1 border-l border-[#2A2A2A] pl-2">
+        <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-1.5">
           <button
-            onClick={() => setZoomScale((z) => Math.max(0.4, parseFloat((z - 0.1).toFixed(2))))}
-            className="p-1 rounded hover:bg-[#252525] text-gray-400 hover:text-white cursor-pointer"
+            type="button"
+            onClick={handleFitToScreen}
+            className="px-1.5 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-1"
+            title="Ekrana Tam Sığdır"
+          >
+            <Maximize size={12} />
+            <span>Sığdır</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoomScale((z) => Math.max(0.3, parseFloat((z - 0.1).toFixed(2))))}
+            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
             title="Uzaklaştır"
           >
             <ZoomOut size={13} />
           </button>
-          <span className="font-mono font-bold text-[9.5px] sm:text-[10px] w-8 text-center text-gray-200">
+          <span className="font-mono font-bold text-[10px] w-7 text-center text-slate-700 dark:text-slate-300">
             {Math.round(zoomScale * 100)}%
           </span>
           <button
+            type="button"
             onClick={() => setZoomScale((z) => Math.min(2.0, parseFloat((z + 0.1).toFixed(2))))}
-            className="p-1 rounded hover:bg-[#252525] text-gray-400 hover:text-white cursor-pointer"
+            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
             title="Yakınlaştır"
           >
             <ZoomIn size={13} />
@@ -579,11 +621,11 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
       </div>
 
-      {/* Centered Rendered Label Stage */}
-      <div className="flex-1 flex items-center justify-center p-2 w-full overflow-auto max-h-full">
+      {/* Centered Rendered Label Stage (Container'a tam sığan dinamik alan) */}
+      <div className="flex-1 flex items-center justify-center p-2 w-full overflow-hidden max-h-[58vh] md:max-h-[66vh]">
         <div
           ref={previewRef}
-          className="transform transition-transform duration-150 origin-center drop-shadow-2xl my-auto flex items-center justify-center max-w-full"
+          className="transform transition-transform duration-150 origin-center drop-shadow-xl my-auto flex items-center justify-center max-w-full max-h-full"
         >
           <ThermalTemplateRenderer
             id="printable-thermal-label"
@@ -598,64 +640,64 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
       </div>
 
       {/* Bottom Info Banner */}
-      <div className="w-full max-w-md bg-[#1C1C1C]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#2A2A2A] text-center text-xs text-gray-400 flex items-center justify-between mt-2">
-        <div className="flex items-center gap-1.5 font-mono font-semibold text-[10px] sm:text-[11px] text-gray-200">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          {effectiveWidth} mm {effectiveHeight ? `× ${effectiveHeight} mm` : '(Kompakt Rulo)'}
+      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800/90 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between mt-2">
+        <div className="flex items-center gap-1.5 font-mono font-semibold text-[11px] text-slate-800 dark:text-slate-200">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+          <span>{effectiveWidth} mm {effectiveHeight ? `× ${effectiveHeight} mm` : '(Rulo)'}</span>
         </div>
-        <div className="text-[10px] sm:text-[11px] text-gray-400 flex items-center gap-1 font-mono">
-          <span>203 DPI ESC/POS</span>
+        <div className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1 font-mono">
+          <span>203 DPI Termal</span>
         </div>
       </div>
     </div>
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4 bg-black/85 backdrop-blur-sm overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-xs overflow-hidden">
       
-      {/* Container: Full Screen on Mobile (100dvh), Sleek Window on Desktop */}
-      <div className="bg-[#181818] text-white w-full h-[100dvh] md:h-[92vh] md:max-w-6xl md:rounded-3xl shadow-2xl border-0 md:border md:border-[#2A2A2A] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      {/* Container: Full Screen on Mobile (100dvh), Sleek Clean Window on Desktop */}
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 w-full h-[100dvh] md:h-[90vh] md:max-w-6xl md:rounded-3xl shadow-2xl border-0 md:border md:border-slate-200 dark:md:border-slate-800 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         
-        {/* Top Header Bar (Native Mobile & Desktop App Bar) */}
-        <div className="px-3 sm:px-5 py-3 sm:py-3.5 bg-[#1C1C1C] border-b border-[#2A2A2A] flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+        {/* Top Header Bar: Ferah, Tam Başlık ve Tek Ana Aksiyon */}
+        <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 -ml-1 rounded-xl text-gray-300 hover:text-white hover:bg-[#2A2A2A] md:hidden cursor-pointer shrink-0"
-              title="Geri Dön"
+              className="p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 transition-colors"
+              title="Kapat"
             >
-              <ChevronLeft size={22} />
+              <ChevronLeft size={22} className="md:hidden" />
+              <X size={18} className="hidden md:block" />
             </button>
 
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-md shadow-blue-500/20 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
               <Printer size={16} />
             </div>
 
-            <div className="min-w-0 flex-1">
+            {/* Başlık: Taşmadan, kesilmeden (... kalmadan) tam görünür */}
+            <div className="min-w-0 flex-1 pr-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h2 className="font-bold text-white text-sm sm:text-base leading-tight py-0.5 truncate max-w-[200px] sm:max-w-sm md:max-w-md">
+                <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm md:text-base leading-snug break-words">
                   {template.title}
                 </h2>
-                <span className="bg-blue-600/20 text-blue-300 border border-blue-500/30 font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded font-bold shrink-0">
+                <span className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
                   {effectiveWidth}mm{effectiveHeight ? `×${effectiveHeight}` : ''}
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-400 mt-0.5 truncate hidden sm:block leading-normal">
-                Dinamik Termal Şablon Editörü & Canlı Önizleme
-              </p>
             </div>
           </div>
 
-          {/* Top Right Desktop Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Top Right Header Actions - TEK ANA YAZDIR BUTONU BURADA */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             {onToggleFavorite && (
               <button
                 type="button"
                 onClick={() => onToggleFavorite(template.id)}
                 className={`p-2 rounded-xl border transition-all active:scale-125 cursor-pointer ${
                   isFavorite
-                    ? 'bg-rose-500 text-white border-rose-400 shadow-md shadow-rose-500/30'
-                    : 'bg-[#252525] hover:bg-[#333] border-[#2A2A2A] text-gray-300 hover:text-rose-400'
+                    ? 'bg-rose-500 text-white border-rose-400 shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-500'
                 }`}
                 title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
               >
@@ -664,48 +706,37 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             )}
 
             <button
-              onClick={handleSaveCustom}
-              className="hidden sm:flex px-3 py-1.5 rounded-xl bg-[#252525] hover:bg-[#333] border border-[#2A2A2A] text-gray-200 text-xs font-bold items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              {isSavedNotice ? <Check size={14} className="text-emerald-400" /> : <Save size={14} />}
-              <span>{isSavedNotice ? 'Kaydedildi' : 'Kaydet'}</span>
-            </button>
-
-            <button
+              type="button"
               onClick={handleExportPNG}
               disabled={isExporting}
-              className="hidden sm:flex px-3 py-1.5 rounded-xl bg-[#252525] hover:bg-[#333] border border-[#2A2A2A] text-gray-200 text-xs font-bold items-center gap-1.5 transition-colors cursor-pointer"
+              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="PNG İndir"
             >
-              <Download size={14} />
-              <span>{isExporting ? '...' : 'PNG'}</span>
+              <Download size={15} />
+              <span className="hidden sm:inline">{isExporting ? '...' : 'PNG'}</span>
             </button>
 
+            {/* TEK ANA YAZDIR BUTONU (Kullanıcı isteği: hem altta hem üstte çift buton olmasın) */}
             <button
+              type="button"
               onClick={handlePrint}
-              className="px-3 sm:px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-600/30 active:scale-95 transition-all cursor-pointer"
+              className="px-3.5 sm:px-4 py-2 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
             >
-              <Printer size={14} />
-              <span className="hidden sm:inline">Termal Yazdır</span>
-              <span className="sm:hidden">Yazdır</span>
-            </button>
-
-            <button
-              onClick={onClose}
-              className="hidden md:block p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-[#252525] transition-colors ml-1 cursor-pointer"
-            >
-              <X size={19} />
+              <Printer size={15} />
+              <span>Yazdır</span>
             </button>
           </div>
         </div>
 
-        {/* Mobile View Switcher Segmented Control (iOS/Android Native Style Pill Bar) */}
-        <div className="flex md:hidden bg-[#161616] p-1.5 border-b border-[#2A2A2A] gap-1 shrink-0 overflow-x-auto scrollbar-none">
+        {/* Mobile View Switcher (Kompakt ve Temiz Tab Bar) */}
+        <div className="flex md:hidden bg-slate-100/90 dark:bg-slate-950 p-1 border-b border-slate-200 dark:border-slate-800 gap-1 shrink-0 overflow-x-auto scrollbar-none">
           <button
+            type="button"
             onClick={() => setMobileView('preview')}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               mobileView === 'preview'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-400 hover:text-white bg-[#202020]'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400'
             }`}
           >
             <Eye size={13} />
@@ -713,11 +744,12 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setMobileView('fields')}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               mobileView === 'fields'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-400 hover:text-white bg-[#202020]'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400'
             }`}
           >
             <Edit3 size={13} />
@@ -725,11 +757,12 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setMobileView('dimensions')}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               mobileView === 'dimensions'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-400 hover:text-white bg-[#202020]'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400'
             }`}
           >
             <Layers size={13} />
@@ -737,15 +770,16 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setMobileView('advanced')}
             className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
               mobileView === 'advanced'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'text-gray-400 hover:text-white bg-[#202020]'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400'
             }`}
           >
             <Settings2 size={13} />
-            <span>Baskı</span>
+            <span>Ayarlar</span>
           </button>
         </div>
 
@@ -756,17 +790,17 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           <div className="flex-1 flex flex-col md:hidden overflow-hidden">
             {mobileView === 'preview' && renderPreviewStage()}
             {mobileView === 'fields' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-[#181818] pb-24">
+              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
                 {renderFieldsTab()}
               </div>
             )}
             {mobileView === 'dimensions' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-[#181818] pb-24">
+              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
                 {renderDimensionsTab()}
               </div>
             )}
             {mobileView === 'advanced' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-[#181818] pb-24">
+              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
                 {renderAdvancedTab()}
               </div>
             )}
@@ -775,131 +809,88 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           {/* DESKTOP CONTENT CONTAINER: Left Stage + Right Bento Form */}
           <div className="hidden md:flex flex-1 flex-row overflow-hidden w-full">
             {/* LEFT: Live Stage */}
-            <div className="flex-1 border-r border-[#2A2A2A] overflow-hidden flex flex-col">
+            <div className="flex-1 border-r border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
               {renderPreviewStage()}
             </div>
 
             {/* RIGHT: Bento Settings Panel */}
-            <div className="w-[420px] lg:w-[460px] bg-[#181818] flex flex-col h-full overflow-hidden">
+            <div className="w-[400px] lg:w-[440px] bg-white dark:bg-slate-900 flex flex-col h-full overflow-hidden">
               {/* Tab Navigation */}
-              <div className="flex border-b border-[#2A2A2A] px-4 pt-3 bg-[#1A1A1A]">
+              <div className="flex border-b border-slate-200 dark:border-slate-800 px-4 pt-2.5 bg-slate-50/70 dark:bg-slate-950/60">
                 <button
+                  type="button"
                   onClick={() => setActiveTab('fields')}
-                  className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'fields'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-200'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
                   <Sliders size={14} />
-                  Alanlar & Metinler
+                  Alanlar
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => setActiveTab('dimensions')}
-                  className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'dimensions'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-200'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
                   <Layers size={14} />
-                  Boyut & Rulo
+                  Ölçü
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => setActiveTab('advanced')}
-                  className={`pb-2.5 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
+                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
                     activeTab === 'advanced'
-                      ? 'border-blue-500 text-blue-400'
-                      : 'border-transparent text-gray-400 hover:text-gray-200'
+                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
-                  <Printer size={14} />
-                  Baskı Ayarı
+                  <Settings2 size={14} />
+                  Ayarlar
                 </button>
               </div>
 
               {/* Tab Body */}
-              <div className="flex-1 p-5 overflow-y-auto space-y-4">
+              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4">
                 {activeTab === 'fields' && renderFieldsTab()}
                 {activeTab === 'dimensions' && renderDimensionsTab()}
                 {activeTab === 'advanced' && renderAdvancedTab()}
               </div>
 
-              {/* Desktop Bottom Footer Actions inside panel */}
-              <div className="p-4 bg-[#1E1E1E] border-t border-[#2A2A2A] flex items-center justify-between gap-2">
+              {/* Desktop Bottom Footer: Sadece ikincil aksiyonlar (Kaydet & Kapat) - Yazdır butonu üstte tek */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition-colors cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
                 >
-                  Kapat
+                  Vazgeç
                 </button>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleExportPNG}
-                    disabled={isExporting}
-                    className="px-3 py-2 text-xs font-bold text-gray-300 bg-[#252525] border border-[#2A2A2A] rounded-xl hover:bg-[#333] flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Download size={14} />
-                    PNG Kaydet
-                  </button>
-                  <button
-                    onClick={handlePrint}
-                    className="px-4 py-2 text-xs font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-500 flex items-center gap-1.5 shadow-md shadow-blue-600/30 cursor-pointer"
-                  >
-                    <Printer size={14} />
-                    Doğrudan Yazdır
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleSaveCustom}
+                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                >
+                  {isSavedNotice ? <Check size={14} className="text-emerald-500" /> : <Save size={14} />}
+                  <span>{isSavedNotice ? 'Kaydedildi' : 'Şablonu Kaydet'}</span>
+                </button>
               </div>
             </div>
           </div>
 
         </div>
 
-        {/* MOBILE STICKY BOTTOM ACTION DOCK (Fixed at bottom for easy thumb reach) */}
-        <div className="md:hidden bg-[#1A1A1A]/95 backdrop-blur-md border-t border-[#2A2A2A] px-3 py-2.5 flex items-center justify-between gap-2 shrink-0 z-30 pb-[calc(0.65rem+env(safe-area-inset-bottom))]">
-          {mobileView === 'preview' ? (
-            <button
-              onClick={() => setMobileView('fields')}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-[#252525] active:bg-[#333] border border-[#333] text-gray-200 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Edit3 size={14} className="text-blue-400" />
-              <span>Alanları Düzenle</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setMobileView('preview')}
-              className="flex-1 py-2.5 px-3 rounded-xl bg-[#252525] active:bg-[#333] border border-[#333] text-gray-200 text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Eye size={14} className="text-emerald-400" />
-              <span>Önizlemeye Dön</span>
-            </button>
-          )}
-
-          <button
-            onClick={handleExportPNG}
-            disabled={isExporting}
-            className="p-2.5 rounded-xl bg-[#252525] active:bg-[#333] border border-[#333] text-gray-200 text-xs font-bold flex items-center justify-center cursor-pointer"
-            title="PNG İndir"
-          >
-            <Download size={16} />
-          </button>
-
-          <button
-            onClick={handlePrint}
-            className="flex-1 py-2.5 px-3.5 rounded-xl bg-blue-600 active:bg-blue-500 text-white text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/30 cursor-pointer"
-          >
-            <Printer size={15} />
-            <span>Termal Yazdır</span>
-          </button>
-        </div>
-
       </div>
 
-      {/* Persistent Offscreen Master Print Target (Ensures 1:1 crisp capture at true dot resolution without offscreen displacement) */}
+      {/* Persistent Offscreen Master Print Target */}
       <div
         style={{
           position: 'fixed',
@@ -927,5 +918,6 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     </div>
   );
 };
+
 
 

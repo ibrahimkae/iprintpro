@@ -2392,19 +2392,30 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       </Tabs>
     </Card>
 
-    {/* Klavyenin / Alt Menünün Üstünde Açılan Akıllı Esnek Metin Düzenleme Çubuğu */}
+    {/* Klavyenin / Alt Menünün Yerine Açılan Akıllı Esnek Metin Düzenleme Çubuğu (Aşağı Kaydırılarak Kapanabilir) */}
     <AnimatePresence>
       {activeDockField && (
         <motion.div
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={{ top: 0.05, bottom: 0.6 }}
+          onDragEnd={(_e, info) => {
+            if (info.offset.y > 35 || info.velocity.y > 150) {
+              setActiveDockField(null);
+            }
+          }}
           initial={{ opacity: 0, y: 20, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.96 }}
           transition={{ duration: 0.16 }}
-          className="fixed left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-teal-500/50 dark:border-teal-500/40 shadow-2xl p-2 sm:p-2.5 space-y-1.5"
+          className="fixed left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-teal-500/50 dark:border-teal-500/40 shadow-2xl p-2 sm:p-2.5 space-y-1.5 touch-none"
           style={{
-            bottom: keyboardOffset > 0 ? `${keyboardOffset + 8}px` : '58px'
+            bottom: keyboardOffset > 0 ? `${keyboardOffset + 8}px` : '12px'
           }}
         >
+          {/* Sürüklenebilir Tutma Kulpu (Aşağı kaydırarak kapatma göstergesi) */}
+          <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto -mt-0.5 mb-0.5 cursor-grab active:cursor-grabbing shrink-0" />
+
           {/* Üst Başlık & Kontrol Çubuğu */}
           <div className="flex items-center justify-between gap-1.5 px-0.5">
             {/* Aktif Alan Adı */}
@@ -2514,60 +2525,70 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       )}
     </AnimatePresence>
 
-    {/* Alt Sabit Kapsül Gezinme Menüsü - Tam Sığan Kompakt Tasarım */}
-    <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[96vw]">
-      <button
-        type="button"
-        onClick={() => setActiveTab('create')}
-        className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-          activeTab === 'create'
-            ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
-        }`}
-      >
-        <Barcode size={14} className="shrink-0" />
-        <span>Oluştur</span>
-      </button>
+    {/* Alt Sabit Kapsül Gezinme Menüsü - Metin düzenlenirken gizlenir, kapanınca yerine geri gelir */}
+    <AnimatePresence>
+      {!activeDockField && (
+        <motion.div
+          initial={{ opacity: 0, y: 15, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 15, scale: 0.96 }}
+          transition={{ duration: 0.16 }}
+          className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[96vw]"
+        >
+          <button
+            type="button"
+            onClick={() => setActiveTab('create')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'create'
+                ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Barcode size={14} className="shrink-0" />
+            <span>Oluştur</span>
+          </button>
 
-      <button
-        type="button"
-        onClick={() => setActiveTab('scan')}
-        className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-          activeTab === 'scan'
-            ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
-        }`}
-      >
-        <Camera size={14} className="shrink-0" />
-        <span>Tara</span>
-      </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('scan')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'scan'
+                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Camera size={14} className="shrink-0" />
+            <span>Tara</span>
+          </button>
 
-      <button
-        type="button"
-        onClick={() => setActiveTab('batch')}
-        className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-          activeTab === 'batch'
-            ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
-        }`}
-      >
-        <Layers size={14} className="shrink-0" />
-        <span>Sıralı</span>
-      </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('batch')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'batch'
+                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Layers size={14} className="shrink-0" />
+            <span>Sıralı</span>
+          </button>
 
-      <button
-        type="button"
-        onClick={() => setActiveTab('archive')}
-        className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-          activeTab === 'archive'
-            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
-            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
-        }`}
-      >
-        <Boxes size={14} className="shrink-0" />
-        <span>Arşiv</span>
-      </button>
-    </div>
+          <button
+            type="button"
+            onClick={() => setActiveTab('archive')}
+            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+              activeTab === 'archive'
+                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >
+            <Boxes size={14} className="shrink-0" />
+            <span>Arşiv</span>
+          </button>
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
   );
 };

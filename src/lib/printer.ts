@@ -24,6 +24,49 @@ export class PrinterService {
   private customDelay: number | null = null;
   private isCancelled: boolean = false;
   private onBatteryLevelChange: ((level: number) => void) | null = null;
+  public lastError: string | null = null;
+
+  static checkBluetoothSupport(): {
+    supported: boolean;
+    isSecureContext: boolean;
+    hasNavigatorBt: boolean;
+    isIframe: boolean;
+    errorMessage?: string;
+  } {
+    if (typeof window === 'undefined') {
+      return { supported: false, isSecureContext: false, hasNavigatorBt: false, isIframe: false, errorMessage: 'Ortam desteklenmiyor.' };
+    }
+    const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isIframe = window.self !== window.top;
+    const hasNavigatorBt = typeof navigator !== 'undefined' && 'bluetooth' in navigator && !!(navigator as any).bluetooth;
+
+    if (!isSecure) {
+      return {
+        supported: false,
+        isSecureContext: false,
+        hasNavigatorBt,
+        isIframe,
+        errorMessage: 'Web Bluetooth sadece HTTPS güvenli bağlantıda çalışır. Lütfen sitenizi https:// ile açın.'
+      };
+    }
+
+    if (!hasNavigatorBt) {
+      return {
+        supported: false,
+        isSecureContext: true,
+        hasNavigatorBt: false,
+        isIframe,
+        errorMessage: 'Tarayıcınızda Web Bluetooth desteği bulunamadı. Lütfen Android Chrome, Edge veya Samsung Internet kullanın.'
+      };
+    }
+
+    return {
+      supported: true,
+      isSecureContext: true,
+      hasNavigatorBt: true,
+      isIframe
+    };
+  }
 
   private PROTOCOLS = {
     LUCK_JINGLE: new Uint8Array([0x51, 0x78]),
@@ -155,6 +198,14 @@ export class PrinterService {
   }
 
   async connect(): Promise<boolean> {
+    this.lastError = null;
+    const support = PrinterService.checkBluetoothSupport();
+    if (!support.supported) {
+      this.lastError = support.errorMessage || 'Bluetooth desteklenmiyor.';
+      logger.error('Bluetooth support check failed:', this.lastError);
+      throw new Error(this.lastError);
+    }
+
     try {
       logger.info('Requesting Bluetooth device...');
       
@@ -219,8 +270,15 @@ export class PrinterService {
         return false;
       }
 
-      logger.error('Connection failed', errMsg);
-      return false;
+      // Permissions policy / iframe / not allowed error
+      if (errMsg.includes('SecurityError') || errMsg.includes('Permissions-Policy') || errMsg.includes('iframe') || errMsg.includes('gesture')) {
+        this.lastError = 'Tarayıcı güvenlik kısıtlaması: Sayfa bir iframe içindeyse Bluetooth engellenmiş olabilir. Lütfen sayfayı harici bir sekmede doğrudan açın.';
+      } else {
+        this.lastError = errMsg;
+      }
+
+      logger.error('Connection failed', this.lastError);
+      throw new Error(this.lastError || 'Bluetooth bağlantısı kurulamadı.');
     }
   }
 

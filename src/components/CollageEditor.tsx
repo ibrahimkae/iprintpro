@@ -684,16 +684,27 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
           </div>
         </div>
 
-        {/* Metin Seçildiğinde Alt Menünün Hemen Üstünde Açılan Hızlı Metin Düzenleme Kutucuğu */}
+        {/* Metin Seçildiğinde Alt Menünün Yerine Açılan Hızlı Metin Düzenleme Kutucuğu (Aşağı Kaydırarak Kapatılabilir) */}
         <AnimatePresence>
           {selectedLayer && selectedLayer.type === 'text' && showFloatingTextBar && (
             <motion.div
-              initial={{ opacity: 0, y: 15, scale: 0.96 }}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.05, bottom: 0.6 }}
+              onDragEnd={(_e, info) => {
+                if (info.offset.y > 35 || info.velocity.y > 150) {
+                  setShowFloatingTextBar(false);
+                }
+              }}
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 15, scale: 0.96 }}
-              transition={{ duration: 0.15 }}
-              className="fixed bottom-[68px] sm:bottom-[74px] left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-2xl p-2 sm:p-2.5 space-y-1.5 text-slate-800 dark:text-slate-100"
+              exit={{ opacity: 0, y: 20, scale: 0.96 }}
+              transition={{ duration: 0.16 }}
+              className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 w-[95vw] max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-purple-500/50 dark:border-purple-500/40 shadow-2xl p-2 sm:p-2.5 space-y-1.5 text-slate-800 dark:text-slate-100 touch-none"
             >
+              {/* Sürüklenebilir Tutma Çizgisi */}
+              <div className="w-8 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto -mt-0.5 mb-1 cursor-grab active:cursor-grabbing shrink-0" />
+
               {/* Üst Satır: Hızlı Metin Düzenleme Girişi + Font Boyutu + Kapat */}
               <div className="flex items-center gap-1.5">
                 <div className="flex-1 min-w-0">
@@ -705,7 +716,7 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
                       applyTextProp('text', e.target.value);
                     }}
                     placeholder="Metin içeriği..."
-                    className="w-full h-7 px-2.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 border-0 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 dark:text-white"
+                    className="w-full h-8 px-2.5 text-[16px] sm:text-xs font-semibold bg-slate-100 dark:bg-slate-800 border-0 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 dark:text-white"
                   />
                 </div>
 
@@ -883,51 +894,61 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Alt Sabit Kapsül Gezinme Menüsü (Sadece Ekleme İşlemleri: Metin, Görsel, PDF) */}
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1.5 sm:gap-2 whitespace-nowrap max-w-[95vw] overflow-x-auto no-scrollbar">
-          <button
-            type="button"
-            onClick={addText}
-            className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/20 active:scale-95 shrink-0"
-          >
-            <Type size={14} />
-            <span>Metin</span>
-          </button>
-
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20 shrink-0 pointer-events-none"
+        {/* Alt Sabit Kapsül Gezinme Menüsü (Metin düzenlenirken gizlenir, kapanınca yerine geri gelir) */}
+        <AnimatePresence>
+          {!(selectedLayer && selectedLayer.type === 'text' && showFloatingTextBar) && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.96 }}
+              transition={{ duration: 0.16 }}
+              className="fixed bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1.5 sm:gap-2 whitespace-nowrap max-w-[95vw] overflow-x-auto no-scrollbar"
             >
-              <ImageIcon size={14} />
-              <span>Görsel</span>
-            </button>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={addImage}
-              title="Görsel Ekle"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </div>
+              <button
+                type="button"
+                onClick={addText}
+                className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/20 active:scale-95 shrink-0"
+              >
+                <Type size={14} />
+                <span>Metin</span>
+              </button>
 
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 shrink-0 pointer-events-none"
-            >
-              <FileText size={14} />
-              <span>PDF</span>
-            </button>
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={addPdf}
-              title="PDF Ekle"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-            />
-          </div>
-        </div>
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20 shrink-0 pointer-events-none"
+                >
+                  <ImageIcon size={14} />
+                  <span>Görsel</span>
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={addImage}
+                  title="Görsel Ekle"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 px-4 sm:px-5 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 shrink-0 pointer-events-none"
+                >
+                  <FileText size={14} />
+                  <span>PDF</span>
+                </button>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={addPdf}
+                  title="PDF Ekle"
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Bottom Panel - compact */}
         <div className="w-full space-y-1.5 overflow-hidden">

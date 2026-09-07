@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs';
 import { usePrinter } from '../context/PrinterContext';
 import { UsbPrinterService } from '../lib/usb-printer';
+import { PrinterService } from '../lib/printer';
 import { LABEL_DIMENSION_PRESETS, LabelDimensionPreset } from '../lib/zpl';
 import {
   Printer,
@@ -85,6 +86,7 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
   const [showAdvancedUsb, setShowAdvancedUsb] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const isIframe = UsbPrinterService.isInsideIframe();
+  const btSupport = PrinterService.checkBluetoothSupport();
 
   const handleCalibrateSensor = async () => {
     setErrorMessage(null);
@@ -302,6 +304,48 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
 
           {/* TAB 1: BLUETOOTH (Minimal & Uygulama İçi Detaylı) */}
           <TabsContent value="bluetooth" className="space-y-3 pt-2">
+            {/* Ortam Teşhisi ve Destek Uyarısı (Web sitelerine deploy edildiğinde veya HTTP durumunda) */}
+            {!btSupport.supported && (
+              <div className="p-3 bg-amber-50/90 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 rounded-xl space-y-1.5 text-xs text-amber-900 dark:text-amber-200">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <AlertCircle size={15} className="text-amber-600 shrink-0" />
+                  <span>Bluetooth Ortam Uyarısı</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
+                  {btSupport.errorMessage}
+                </p>
+                {!btSupport.isSecureContext && typeof window !== 'undefined' && window.location.protocol === 'http:' && (
+                  <div className="pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        window.location.href = window.location.href.replace('http:', 'https:');
+                      }}
+                      className="h-6 text-[10px] font-bold border-amber-400 text-amber-900 dark:text-amber-100 hover:bg-amber-100"
+                    >
+                      HTTPS ile Yeniden Yükle
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isIframe && btSupport.supported && (
+              <div className="p-2.5 bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl text-xs text-sky-800 dark:text-sky-300 flex items-center justify-between gap-2">
+                <div className="text-[11px]">
+                  <span>Çerçeve (Iframe) içi çalışıyor. İzin penceresi açılmazsa ayrı sekmede açın.</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => UsbPrinterService.openInStandaloneTab()}
+                  className="px-2 py-1 bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-bold rounded-lg shrink-0 flex items-center gap-1 cursor-pointer"
+                >
+                  <ExternalLink size={10} /> Sekmede Aç
+                </button>
+              </div>
+            )}
+
             {/* Ana Bluetooth Bağlan Butonu */}
             <Button
               onClick={handleConnectBle}

@@ -197,6 +197,7 @@ export function PrinterProvider({ children }: { children: React.ReactNode }) {
         return;
       }
       logger.error('Bağlantı hatası:', error);
+      throw error;
     }
   }, [printer, saveLastDevice, refreshPairedDevices]);
 
