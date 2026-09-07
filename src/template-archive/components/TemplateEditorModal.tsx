@@ -516,57 +516,64 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const renderPreviewStage = () => (
     <div className="flex-1 bg-slate-100/80 dark:bg-slate-950 p-2 sm:p-4 flex flex-col items-center justify-between overflow-hidden relative w-full h-full pb-20">
       {/* Üst Kağıt & Büyütme Araç Çubuğu */}
-      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex items-center justify-between mb-2 text-xs flex-wrap gap-1 shrink-0">
-        <div className="flex items-center gap-1">
-          <span className="text-[10px] font-bold text-slate-400 mr-0.5">Kağıt:</span>
-          {(['standard', 'vintage', 'dither', 'invert'] as ThermalPaperStyle[]).map((style) => (
-            <button
-              key={style}
-              type="button"
-              onClick={() => setPaperStyle(style)}
-              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
-                paperStyle === style
-                  ? 'bg-indigo-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              {style === 'standard' && 'Beyaz'}
-              {style === 'vintage' && 'Kraft'}
-              {style === 'dither' && 'Matris'}
-              {style === 'invert' && 'Siyah'}
-            </button>
-          ))}
+      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-2 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex flex-col sm:flex-row items-center justify-between mb-2 text-xs gap-2 shrink-0">
+        {/* Kağıt Stili Seçimi */}
+        <div className="flex items-center gap-1 w-full sm:w-auto justify-center sm:justify-start">
+          <span className="text-[10px] font-bold text-slate-400 mr-0.5 shrink-0">Kağıt:</span>
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/70 p-0.5 rounded-xl">
+            {(['standard', 'vintage', 'dither', 'invert'] as ThermalPaperStyle[]).map((style) => (
+              <button
+                key={style}
+                type="button"
+                onClick={() => setPaperStyle(style)}
+                className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer ${
+                  paperStyle === style
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                {style === 'standard' && 'Beyaz'}
+                {style === 'vintage' && 'Kraft'}
+                {style === 'dither' && 'Matris'}
+                {style === 'invert' && 'Siyah'}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-1.5">
+        {/* Yakınlaştırma & Sığdırma Kontrolleri */}
+        <div className="flex items-center justify-center gap-1.5 w-full sm:w-auto sm:border-l sm:border-slate-200 sm:dark:border-slate-800 sm:pl-2.5">
           <button
             type="button"
             onClick={handleFitToScreen}
-            className="px-1.5 py-1 rounded text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer flex items-center gap-1"
+            className="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800/70 cursor-pointer flex items-center gap-1 border border-slate-200/60 dark:border-slate-700/60 transition-colors"
             title="Ekrana Tam Sığdır"
           >
             <Maximize size={12} />
             <span>Sığdır</span>
           </button>
-          <button
-            type="button"
-            onClick={() => setZoomScale((z) => Math.max(0.3, parseFloat((z - 0.1).toFixed(2))))}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
-            title="Uzaklaştır"
-          >
-            <ZoomOut size={13} />
-          </button>
-          <span className="font-mono font-bold text-[10px] w-8 text-center text-slate-700 dark:text-slate-300">
-            {Math.round(zoomScale * 100)}%
-          </span>
-          <button
-            type="button"
-            onClick={() => setZoomScale((z) => Math.min(2.5, parseFloat((z + 0.1).toFixed(2))))}
-            className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
-            title="Yakınlaştır"
-          >
-            <ZoomIn size={13} />
-          </button>
+
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800/70 px-1 py-0.5 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+            <button
+              type="button"
+              onClick={() => setZoomScale((z) => Math.max(0.3, parseFloat((z - 0.1).toFixed(2))))}
+              className="p-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer transition-colors"
+              title="Uzaklaştır"
+            >
+              <ZoomOut size={13} />
+            </button>
+            <span className="font-mono font-bold text-[10px] w-8 text-center text-slate-700 dark:text-slate-300 select-none">
+              {Math.round(zoomScale * 100)}%
+            </span>
+            <button
+              type="button"
+              onClick={() => setZoomScale((z) => Math.min(2.5, parseFloat((z + 0.1).toFixed(2))))}
+              className="p-1 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer transition-colors"
+              title="Yakınlaştır"
+            >
+              <ZoomIn size={13} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -604,32 +611,81 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col h-full w-full overflow-hidden select-none animate-in fade-in duration-150">
       
-      {/* 1. Üst Başlık Çubuğu: Geri Butonu, Başlık (En fazla 2 satır, 57mm kalktı), Sağda Tek Ana Yazdır */}
-      <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 transition-colors"
-            title="Geri Dön"
-          >
-            <ChevronLeft size={22} />
-          </button>
+      {/* 1. Üst Başlık Çubuğu */}
+      <div className="px-3 sm:px-5 py-2 sm:py-2.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 shrink-0">
+        {/* Üst Satır (Mobilde Navigasyon & Butonlar, Masaüstünde Sol Taraf) */}
+        <div className="flex items-center justify-between sm:justify-start gap-2 min-w-0 sm:flex-1">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 transition-colors"
+              title="Geri Dön"
+            >
+              <ChevronLeft size={22} />
+            </button>
 
-          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
-            <Printer size={16} />
+            {/* Masaüstünde Başlık Sol Tarafta Yan Yana Durur */}
+            <div className="hidden sm:flex items-center gap-2 min-w-0 flex-1 pr-1">
+              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
+                <Printer size={16} />
+              </div>
+              <h2 className="font-bold text-slate-900 dark:text-slate-100 text-sm md:text-base leading-snug line-clamp-2 break-words">
+                {template.title}
+              </h2>
+            </div>
           </div>
 
-          {/* İsim Kısmı: En fazla 2 satır, tek satıra sığarsa tek satır, 57mm yazısı kaldırıldı */}
-          <div className="min-w-0 flex-1 pr-1">
-            <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm md:text-base leading-snug line-clamp-2 break-words">
-              {template.title}
-            </h2>
+          {/* Mobilde Sağ Butonlar Üst Satırda Yer Alır */}
+          <div className="flex sm:hidden items-center gap-1.5 shrink-0">
+            {onToggleFavorite && (
+              <button
+                type="button"
+                onClick={() => onToggleFavorite(template.id)}
+                className={`p-1.5 rounded-xl border transition-all active:scale-125 cursor-pointer ${
+                  isFavorite
+                    ? 'bg-rose-500 text-white border-rose-400 shadow-xs'
+                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-500'
+                }`}
+                title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+              >
+                <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={handleExportPNG}
+              disabled={isExporting}
+              className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+              title="PNG İndir"
+            >
+              <Download size={15} />
+            </button>
+
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
+            >
+              <Printer size={15} />
+              <span>Yazdır</span>
+            </button>
           </div>
         </div>
 
-        {/* Sağ Üst Aksiyonlar: Favori, PNG İndir, TEK ANA YAZDIR BUTONU */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Mobilde Başlık Kısmı: Az bir şey aşağıda, tam genişlikte ferahça okunur */}
+        <div className="flex sm:hidden items-center gap-2 px-1 pb-1 pt-0.5 border-t border-slate-100 dark:border-slate-800/60">
+          <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
+            <Printer size={13} />
+          </div>
+          <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm leading-snug line-clamp-2 break-words flex-1">
+            {template.title}
+          </h2>
+        </div>
+
+        {/* Masaüstü Aksiyon Butonları */}
+        <div className="hidden sm:flex items-center gap-1.5 sm:gap-2 shrink-0">
           {onToggleFavorite && (
             <button
               type="button"
@@ -656,7 +712,6 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
             <span className="hidden sm:inline">{isExporting ? '...' : 'PNG'}</span>
           </button>
 
-          {/* Tek Ana Yazdır Butonu */}
           <button
             type="button"
             onClick={handlePrint}
@@ -719,7 +774,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('preview')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
             activeTab === 'preview'
               ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
@@ -732,7 +787,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('fields')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
             activeTab === 'fields'
               ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
@@ -745,7 +800,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('dimensions')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`flex items-center gap-1 sm:gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
             activeTab === 'dimensions'
               ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
@@ -758,14 +813,15 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         <button
           type="button"
           onClick={() => setActiveTab('advanced')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          title="Ayarlar"
+          className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
             activeTab === 'advanced'
               ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
               : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
           }`}
         >
           <Settings2 size={15} />
-          <span>Ayarlar</span>
+          <span className="hidden sm:inline">Ayarlar</span>
         </button>
       </div>
 
