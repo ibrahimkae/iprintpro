@@ -166,6 +166,23 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
     }
   };
 
+  // Bağımsız Sayfa: Şablon düzenleme açıkken kütüphane arka planda görünmez ve kaydırılmaz
+  if (isEditorModalOpen && activeEditorTemplate) {
+    return (
+      <TemplateEditorModal
+        template={activeEditorTemplate}
+        isOpen={isEditorModalOpen}
+        onClose={() => setIsEditorModalOpen(false)}
+        onSaveAsCustom={handleSaveAsCustom}
+        onPrintDirect={handleDirectPrintFromModal}
+        initialWidthMm={pageWidth <= 400 ? 57 : pageWidth <= 600 ? 80 : 100}
+        initialPaperStyle="standard"
+        isFavorite={favorites.includes(activeEditorTemplate.id)}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    );
+  }
+
   return (
     <div className="space-y-3 pb-24 max-w-7xl mx-auto w-full">
       {/* 1. FAVORİLER TAB */}
@@ -401,21 +418,6 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
             </div>
           )}
         </div>
-      )}
-
-      {/* Editor Modal for Favorite Store Templates */}
-      {isEditorModalOpen && activeEditorTemplate && (
-        <TemplateEditorModal
-          template={activeEditorTemplate}
-          isOpen={isEditorModalOpen}
-          onClose={() => setIsEditorModalOpen(false)}
-          onSaveAsCustom={handleSaveAsCustom}
-          onPrintDirect={handleDirectPrintFromModal}
-          initialWidthMm={pageWidth <= 400 ? 57 : pageWidth <= 600 ? 80 : 100}
-          initialPaperStyle="standard"
-          isFavorite={favorites.includes(activeEditorTemplate.id)}
-          onToggleFavorite={handleToggleFavorite}
-        />
       )}
 
       {/* 3. ALT KISMA MİNİ MENÜ (FAVORİLER, TASLAKLAR & MAĞAZA) */}

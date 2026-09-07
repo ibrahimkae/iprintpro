@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ThermalTemplate, ThermalPaperStyle } from '../types';
 import { ThermalTemplateRenderer } from './ThermalTemplateRenderer';
-import { STANDARD_DIMENSIONS } from '../data/dimensions';
 import { captureElementToDataUrl } from '../../utils/dom-capture';
 import {
-  X,
   Printer,
   Download,
   Save,
@@ -15,8 +13,6 @@ import {
   ZoomOut,
   Sparkles,
   Check,
-  Maximize2,
-  Minimize2,
   Eye,
   Edit3,
   Settings2,
@@ -48,23 +44,21 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   isFavorite = false,
   onToggleFavorite
 }) => {
-  const [formData, setFormData] = useState<Record<string, any>>(() => template?.defaultData ? { ...template.defaultData } : {});
+  const [formData, setFormData] = useState<Record<string, any>>(() => (template?.defaultData ? { ...template.defaultData } : {}));
   const [selectedWidthMm, setSelectedWidthMm] = useState<number>(template?.recommendedWidthMm || initialWidthMm || 57);
   const [customWidthMm, setCustomWidthMm] = useState<number>(template?.recommendedWidthMm || initialWidthMm || 57);
   const [isCustomWidth, setIsCustomWidth] = useState<boolean>(false);
   const [heightMode, setHeightMode] = useState<'auto' | 'fixed'>(template?.heightMm ? 'fixed' : 'auto');
   const [fixedHeightMm, setFixedHeightMm] = useState<number>(template?.heightMm || 50);
   const [paperStyle, setPaperStyle] = useState<ThermalPaperStyle>(initialPaperStyle);
-  const [zoomScale, setZoomScale] = useState<number>(0.9);
+  const [zoomScale, setZoomScale] = useState<number>(0.92);
   const [copies, setCopies] = useState<number>(1);
   const [isSavedNotice, setIsSavedNotice] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [customTitle, setCustomTitle] = useState<string>(template ? `${template.title} (Özelleştirilmiş)` : '');
   
-  // Mobile / Desktop active tabs
-  const [activeTab, setActiveTab] = useState<'fields' | 'dimensions' | 'advanced'>('fields');
-  // For mobile view switch
-  const [mobileView, setMobileView] = useState<'preview' | 'fields' | 'dimensions' | 'advanced'>('preview');
+  // Alt Menü Sekmeleri: Önizleme, Alanlar, Ölçü, Ayarlar
+  const [activeTab, setActiveTab] = useState<'preview' | 'fields' | 'dimensions' | 'advanced'>('preview');
 
   const previewRef = useRef<HTMLDivElement | null>(null);
   const exportCaptureRef = useRef<HTMLDivElement | null>(null);
@@ -72,24 +66,41 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   const effectiveWidth = isCustomWidth ? customWidthMm : selectedWidthMm;
   const effectiveHeight = heightMode === 'fixed' ? fixedHeightMm : undefined;
 
-  // Akıllı tam ekrana sığdırma ölçeği hesabı
+  // Akıllı ve ferah tam ekrana sığdırma ölçeği hesabı (Çok küçültmeden, ekrana tam ve büyük sığdırma)
   const calculateAutoFitScale = (targetWidth: number, targetHeight?: number) => {
-    if (typeof window === 'undefined') return 0.85;
+    if (typeof window === 'undefined') return 1.0;
     const isMobile = window.innerWidth < 768;
-    const availWidth = isMobile ? Math.max(260, window.innerWidth - 48) : 520;
-    const availHeight = isMobile ? Math.max(220, window.innerHeight * 0.42) : 520;
+    
+    // Sahne için ayrılan net genişlik ve yükseklik
+    const availWidth = isMobile
+      ? Math.max(280, window.innerWidth - 32)
+      : Math.min(840, window.innerWidth * 0.52);
 
-    // Termal piksel genişliği tahmini (1mm ~ 8 dots)
-    const estWidthPx = targetWidth * 7.6;
-    const estHeightPx = (targetHeight || 65) * 7.6;
+    // Üst başlık (~52px), kağıt araç çubuğu (~42px), alt bant (~36px), alt menü (~68px)
+    const availHeight = Math.max(320, window.innerHeight - 200);
 
-    const scaleW = availWidth / estWidthPx;
+    // ThermalTemplateRenderer içerisindeki kanonik piksel genişliği
+    const canonicalWidthPx =
+      targetWidth === 57
+        ? 384
+        : targetWidth === 80
+        ? 576
+        : targetWidth >= 100
+        ? 800
+        : Math.max(280, Math.round(((targetWidth / 57) * 384) / 8) * 8);
+
+    // Tahmini şablon dikey oranı
+    const estHeightPx = targetHeight ? (targetHeight / targetWidth) * canonicalWidthPx : canonicalWidthPx * 1.15;
+
+    const scaleW = availWidth / canonicalWidthPx;
     const scaleH = availHeight / estHeightPx;
-    const fit = Math.min(scaleW, scaleH, 1.0);
-    return Math.max(0.35, parseFloat(fit.toFixed(2)));
+    
+    // Ekrana tam ve belirgin şekilde sığması için cömert %96 doluluk katsayısı
+    const fit = Math.min(scaleW, scaleH) * 0.96;
+    return Math.max(0.45, Math.min(2.5, parseFloat(fit.toFixed(2))));
   };
 
-  // Synchronize state faithfully when template opens
+  // Şablon açıldığında durumu senkronize et
   useEffect(() => {
     if (template && isOpen) {
       setFormData({ ...template.defaultData });
@@ -109,8 +120,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
 
       setZoomScale(calculateAutoFitScale(targetWidth, targetHeight));
       setCustomTitle(`${template.title} (Özelleştirilmiş)`);
-      setMobileView('preview');
-      setActiveTab('fields');
+      setActiveTab('preview');
     }
   }, [template, isOpen, initialWidthMm, initialPaperStyle]);
 
@@ -180,9 +190,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     setTimeout(() => setIsSavedNotice(false), 2500);
   };
 
-  // Responsive Form Fields View
+  // Form Alanları Paneli
   const renderFieldsTab = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-xl mx-auto w-full">
       <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
         <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
           <Sliders size={13} className="text-indigo-600 dark:text-indigo-400" />
@@ -281,217 +291,156 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     </div>
   );
 
-  // Responsive Dimensions Tab
+  // Minimalist ve Sadeleştirilmiş Ölçü Paneli (Gereksiz detay ve kaydırma olmadan)
   const renderDimensionsTab = () => (
-    <div className="space-y-4">
-      <div>
-        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2 flex items-center justify-between">
-          <span>Standart Ölçü Şablonları</span>
-          <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold">Hızlı Seçim</span>
-        </h3>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 leading-relaxed">
-          Şablon seçilen kağıt genişliğine göre otomatik uyarlanır.
-        </p>
-
-        <div className="grid grid-cols-2 gap-2">
-          {STANDARD_DIMENSIONS.map((dim) => {
-            const isSelected = !isCustomWidth && selectedWidthMm === dim.widthMm && (
-              (dim.heightMm && heightMode === 'fixed' && fixedHeightMm === dim.heightMm) ||
-              (!dim.heightMm && heightMode === 'auto')
-            );
-
+    <div className="space-y-4 max-w-lg mx-auto w-full">
+      {/* 1. Kağıt Genişliği */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Kağıt Genişliği (En)
+          </label>
+          <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+            {effectiveWidth} mm
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { width: 57, label: '57 mm', desc: 'Standart' },
+            { width: 80, label: '80 mm', desc: 'Geniş' },
+            { width: 100, label: '100 mm', desc: 'Kargo 10x15' },
+            { width: 150, label: '150 mm', desc: 'Endüstriyel' }
+          ].map((item) => {
+            const isSelected = !isCustomWidth && selectedWidthMm === item.width;
             return (
               <button
-                key={dim.id}
+                key={item.width}
                 type="button"
                 onClick={() => {
                   setIsCustomWidth(false);
-                  setSelectedWidthMm(dim.widthMm);
-                  setCustomWidthMm(dim.widthMm);
-                  if (dim.heightMm) {
-                    setHeightMode('fixed');
-                    setFixedHeightMm(dim.heightMm);
-                  } else {
-                    setHeightMode('auto');
-                  }
-                  setZoomScale(calculateAutoFitScale(dim.widthMm, dim.heightMm));
+                  setSelectedWidthMm(item.width);
+                  setCustomWidthMm(item.width);
+                  setZoomScale(calculateAutoFitScale(item.width, effectiveHeight));
                 }}
-                className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                   isSelected
-                    ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
-                    : 'border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300'
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm font-bold'
+                    : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-xs">{dim.name}</span>
-                  <span className={`text-[9.5px] px-1.5 py-0.5 rounded font-mono ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                  }`}>
-                    {dim.badge}
-                  </span>
+                <div className="text-xs font-bold">{item.label}</div>
+                <div className={`text-[10px] ${isSelected ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'}`}>
+                  {item.desc}
                 </div>
-                <p className={`text-[10px] mt-1 line-clamp-1 ${isSelected ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'}`}>
-                  {dim.description}
-                </p>
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* Custom Width Slider */}
-      <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-            <Sliders size={14} className="text-indigo-600 dark:text-indigo-400" />
-            Genişlik (En) Ayarı
-          </label>
-          <div className="flex items-center gap-1">
+        {/* Özel Genişlik Girişi */}
+        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 mt-2">
+          <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Özel Genişlik:</span>
+          <div className="flex items-center gap-1.5">
             <input
               type="number"
               min="30"
-              max="180"
+              max="200"
               value={customWidthMm}
               onChange={(e) => {
                 const val = parseInt(e.target.value, 10) || 57;
                 setCustomWidthMm(val);
                 setIsCustomWidth(true);
+                setZoomScale(calculateAutoFitScale(val, effectiveHeight));
               }}
-              className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white"
+              className="w-16 px-2 py-1 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
-            <span className="font-mono text-xs text-slate-500">mm</span>
+            <span className="text-xs font-mono text-slate-400">mm</span>
           </div>
-        </div>
-
-        <input
-          type="range"
-          min="35"
-          max="180"
-          step="1"
-          value={customWidthMm}
-          onChange={(e) => {
-            const val = parseInt(e.target.value, 10);
-            setCustomWidthMm(val);
-            setIsCustomWidth(true);
-          }}
-          className="w-full accent-indigo-600 cursor-pointer"
-        />
-
-        <div className="flex items-center gap-1.5">
-          {[57, 80, 100, 150].map((w) => (
-            <button
-              key={w}
-              type="button"
-              onClick={() => {
-                setCustomWidthMm(w);
-                setSelectedWidthMm(w);
-                setIsCustomWidth(false);
-                setZoomScale(calculateAutoFitScale(w, effectiveHeight));
-              }}
-              className={`flex-1 py-1 rounded-lg text-[10px] font-mono font-bold border transition-colors cursor-pointer ${
-                effectiveWidth === w
-                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {w} mm
-            </button>
-          ))}
         </div>
       </div>
 
-      {/* Height / Uzunluk Kontrolü */}
-      <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-        <div className="flex justify-between items-center">
-          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-            <Layers size={14} className="text-indigo-600 dark:text-indigo-400" />
-            Uzunluk Davranışı
+      {/* 2. Kağıt Uzunluğu (Boy) */}
+      <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+            Uzunluk / Boyut
           </label>
-          <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-            {heightMode === 'auto' ? 'Kompakt Rulo' : `${fixedHeightMm} mm`}
+          <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">
+            {heightMode === 'auto' ? 'Otomatik Rulo' : `${fixedHeightMm} mm`}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        {/* Rulo vs Sabit Boyut Segmented Control */}
+        <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl gap-1">
           <button
             type="button"
             onClick={() => {
               setHeightMode('auto');
               setZoomScale(calculateAutoFitScale(effectiveWidth, undefined));
             }}
-            className={`p-2 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-0.5 cursor-pointer ${
+            className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               heightMode === 'auto'
-                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span className="flex items-center gap-1 text-[11px] sm:text-xs">
-              <Minimize2 size={13} />
-              Otomatik Rulo
-            </span>
-            <span className="text-[9px] opacity-80 font-normal">Boşluksuz</span>
+            Otomatik Rulo
           </button>
-
           <button
             type="button"
             onClick={() => {
               setHeightMode('fixed');
               setZoomScale(calculateAutoFitScale(effectiveWidth, fixedHeightMm));
             }}
-            className={`p-2 rounded-xl border text-xs font-bold transition-all flex flex-col items-center gap-0.5 cursor-pointer ${
+            className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               heightMode === 'fixed'
-                ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span className="flex items-center gap-1 text-[11px] sm:text-xs">
-              <Maximize2 size={13} />
-              Sabit Boy
-            </span>
-            <span className="text-[9px] opacity-80 font-normal">{fixedHeightMm} mm</span>
+            Sabit Boyut
           </button>
         </div>
 
+        {/* Sabit Boy Seçiliyse Kompakt Presetler */}
         {heightMode === 'fixed' && (
-          <div className="pt-2 space-y-2.5 border-t border-slate-200 dark:border-slate-800">
-            <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-600 dark:text-slate-300 font-medium">Sabit Uzunluk:</span>
-              <div className="flex items-center gap-1">
+          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2.5 animate-in fade-in duration-100">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">Sabit Yükseklik:</span>
+              <div className="flex items-center gap-1.5">
                 <input
                   type="number"
                   min="20"
-                  max="250"
+                  max="300"
                   value={fixedHeightMm}
-                  onChange={(e) => setFixedHeightMm(parseInt(e.target.value, 10) || 50)}
-                  className="w-14 px-1.5 py-0.5 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded text-slate-900 dark:text-white"
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value, 10) || 50;
+                    setFixedHeightMm(val);
+                    setZoomScale(calculateAutoFitScale(effectiveWidth, val));
+                  }}
+                  className="w-16 px-2 py-1 text-xs text-center font-mono font-bold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
-                <span className="font-mono text-xs text-slate-500">mm</span>
+                <span className="text-xs font-mono text-slate-400">mm</span>
               </div>
             </div>
 
-            <input
-              type="range"
-              min="20"
-              max="250"
-              step="5"
-              value={fixedHeightMm}
-              onChange={(e) => setFixedHeightMm(parseInt(e.target.value, 10))}
-              className="w-full accent-indigo-600 cursor-pointer"
-            />
-
-            <div className="flex items-center gap-1">
-              {[30, 50, 75, 100, 150].map((h) => (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {[30, 40, 50, 75, 100, 150].map((h) => (
                 <button
                   key={h}
                   type="button"
-                  onClick={() => setFixedHeightMm(h)}
-                  className={`flex-1 py-1 rounded-md text-[9px] font-mono font-bold border transition-colors cursor-pointer ${
+                  onClick={() => {
+                    setFixedHeightMm(h);
+                    setZoomScale(calculateAutoFitScale(effectiveWidth, h));
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
                     fixedHeightMm === h
-                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-                      : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300'
                   }`}
                 >
-                  {h}
+                  {h} mm
                 </button>
               ))}
             </div>
@@ -501,9 +450,9 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     </div>
   );
 
-  // Responsive Advanced / Print Settings Tab
+  // Ayarlar Paneli (Kopya Sayısı ve Özel Kayıt)
   const renderAdvancedTab = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 max-w-lg mx-auto w-full">
       <div>
         <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide mb-2">
           Baskı Adedi
@@ -536,7 +485,7 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           Termal Yazıcı İpucu:
         </div>
         <p className="leading-relaxed text-[11px] opacity-90">
-          Yazdırırken tarayıcının veya sistemin yazdırma penceresinde kenar boşluklarını (Margins) <strong>"Yok / None"</strong> olarak seçiniz.
+          Yazdırırken tarayıcının veya sistemin yazdırma penceresinde kenar boşluklarını (Margins) <strong>&quot;Yok / None&quot;</strong> olarak seçiniz.
         </p>
       </div>
 
@@ -563,11 +512,11 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     </div>
   );
 
-  // Live Stage Component (Önizleme alanı - Sayfaya tam sığar, asla taşma yapmaz)
+  // Canlı Önizleme Sahnesi: Tam ekran fit sığdırma ve ferah görüntüleme
   const renderPreviewStage = () => (
-    <div className="flex-1 bg-slate-100/80 dark:bg-slate-950 p-2 sm:p-3.5 flex flex-col items-center justify-between overflow-hidden relative w-full h-full">
-      {/* Top Floating Toolbar */}
-      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex items-center justify-between mb-2 text-xs flex-wrap gap-1">
+    <div className="flex-1 bg-slate-100/80 dark:bg-slate-950 p-2 sm:p-4 flex flex-col items-center justify-between overflow-hidden relative w-full h-full pb-20">
+      {/* Üst Kağıt & Büyütme Araç Çubuğu */}
+      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-xs flex items-center justify-between mb-2 text-xs flex-wrap gap-1 shrink-0">
         <div className="flex items-center gap-1">
           <span className="text-[10px] font-bold text-slate-400 mr-0.5">Kağıt:</span>
           {(['standard', 'vintage', 'dither', 'invert'] as ThermalPaperStyle[]).map((style) => (
@@ -607,12 +556,12 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
           >
             <ZoomOut size={13} />
           </button>
-          <span className="font-mono font-bold text-[10px] w-7 text-center text-slate-700 dark:text-slate-300">
+          <span className="font-mono font-bold text-[10px] w-8 text-center text-slate-700 dark:text-slate-300">
             {Math.round(zoomScale * 100)}%
           </span>
           <button
             type="button"
-            onClick={() => setZoomScale((z) => Math.min(2.0, parseFloat((z + 0.1).toFixed(2))))}
+            onClick={() => setZoomScale((z) => Math.min(2.5, parseFloat((z + 0.1).toFixed(2))))}
             className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white cursor-pointer"
             title="Yakınlaştır"
           >
@@ -621,8 +570,8 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
       </div>
 
-      {/* Centered Rendered Label Stage (Container'a tam sığan dinamik alan) */}
-      <div className="flex-1 flex items-center justify-center p-2 w-full overflow-hidden max-h-[58vh] md:max-h-[66vh]">
+      {/* Merkeze Oturan Termal Etiket Sahnesi */}
+      <div className="flex-1 flex items-center justify-center p-2 w-full overflow-hidden min-h-0">
         <div
           ref={previewRef}
           className="transform transition-transform duration-150 origin-center drop-shadow-xl my-auto flex items-center justify-center max-w-full max-h-full"
@@ -639,8 +588,8 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
         </div>
       </div>
 
-      {/* Bottom Info Banner */}
-      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800/90 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between mt-2">
+      {/* Alt Bilgi Bandı */}
+      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200/90 dark:border-slate-800/90 text-center text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between mt-2 shrink-0">
         <div className="flex items-center gap-1.5 font-mono font-semibold text-[11px] text-slate-800 dark:text-slate-200">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
           <span>{effectiveWidth} mm {effectiveHeight ? `× ${effectiveHeight} mm` : '(Rulo)'}</span>
@@ -653,244 +602,174 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center md:p-4 bg-slate-900/60 dark:bg-black/80 backdrop-blur-xs overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col h-full w-full overflow-hidden select-none animate-in fade-in duration-150">
       
-      {/* Container: Full Screen on Mobile (100dvh), Sleek Clean Window on Desktop */}
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 w-full h-[100dvh] md:h-[90vh] md:max-w-6xl md:rounded-3xl shadow-2xl border-0 md:border md:border-slate-200 dark:md:border-slate-800 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        
-        {/* Top Header Bar: Ferah, Tam Başlık ve Tek Ana Aksiyon */}
-        <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 transition-colors"
-              title="Kapat"
-            >
-              <ChevronLeft size={22} className="md:hidden" />
-              <X size={18} className="hidden md:block" />
-            </button>
+      {/* 1. Üst Başlık Çubuğu: Geri Butonu, Başlık (En fazla 2 satır, 57mm kalktı), Sağda Tek Ana Yazdır */}
+      <div className="px-3 sm:px-5 py-2.5 sm:py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2 shrink-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 -ml-1 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shrink-0 transition-colors"
+            title="Geri Dön"
+          >
+            <ChevronLeft size={22} />
+          </button>
 
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
-              <Printer size={16} />
-            </div>
-
-            {/* Başlık: Taşmadan, kesilmeden (... kalmadan) tam görünür */}
-            <div className="min-w-0 flex-1 pr-1">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm md:text-base leading-snug break-words">
-                  {template.title}
-                </h2>
-                <span className="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-mono text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-md font-bold shrink-0">
-                  {effectiveWidth}mm{effectiveHeight ? `×${effectiveHeight}` : ''}
-                </span>
-              </div>
-            </div>
+          <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center font-bold shrink-0">
+            <Printer size={16} />
           </div>
 
-          {/* Top Right Header Actions - TEK ANA YAZDIR BUTONU BURADA */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {onToggleFavorite && (
-              <button
-                type="button"
-                onClick={() => onToggleFavorite(template.id)}
-                className={`p-2 rounded-xl border transition-all active:scale-125 cursor-pointer ${
-                  isFavorite
-                    ? 'bg-rose-500 text-white border-rose-400 shadow-xs'
-                    : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-500'
-                }`}
-                title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
-              >
-                <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={handleExportPNG}
-              disabled={isExporting}
-              className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              title="PNG İndir"
-            >
-              <Download size={15} />
-              <span className="hidden sm:inline">{isExporting ? '...' : 'PNG'}</span>
-            </button>
-
-            {/* TEK ANA YAZDIR BUTONU (Kullanıcı isteği: hem altta hem üstte çift buton olmasın) */}
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="px-3.5 sm:px-4 py-2 sm:py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
-            >
-              <Printer size={15} />
-              <span>Yazdır</span>
-            </button>
+          {/* İsim Kısmı: En fazla 2 satır, tek satıra sığarsa tek satır, 57mm yazısı kaldırıldı */}
+          <div className="min-w-0 flex-1 pr-1">
+            <h2 className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm md:text-base leading-snug line-clamp-2 break-words">
+              {template.title}
+            </h2>
           </div>
         </div>
 
-        {/* Mobile View Switcher (Kompakt ve Temiz Tab Bar) */}
-        <div className="flex md:hidden bg-slate-100/90 dark:bg-slate-950 p-1 border-b border-slate-200 dark:border-slate-800 gap-1 shrink-0 overflow-x-auto scrollbar-none">
-          <button
-            type="button"
-            onClick={() => setMobileView('preview')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
-              mobileView === 'preview'
-                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            <Eye size={13} />
-            <span>Önizleme</span>
-          </button>
+        {/* Sağ Üst Aksiyonlar: Favori, PNG İndir, TEK ANA YAZDIR BUTONU */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {onToggleFavorite && (
+            <button
+              type="button"
+              onClick={() => onToggleFavorite(template.id)}
+              className={`p-2 rounded-xl border transition-all active:scale-125 cursor-pointer ${
+                isFavorite
+                  ? 'bg-rose-500 text-white border-rose-400 shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-500'
+              }`}
+              title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+            >
+              <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+            </button>
+          )}
 
           <button
             type="button"
-            onClick={() => setMobileView('fields')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
-              mobileView === 'fields'
-                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400'
-            }`}
+            onClick={handleExportPNG}
+            disabled={isExporting}
+            className="p-2 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            title="PNG İndir"
           >
-            <Edit3 size={13} />
-            <span>Alanlar</span>
+            <Download size={15} />
+            <span className="hidden sm:inline">{isExporting ? '...' : 'PNG'}</span>
           </button>
 
+          {/* Tek Ana Yazdır Butonu */}
           <button
             type="button"
-            onClick={() => setMobileView('dimensions')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
-              mobileView === 'dimensions'
-                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400'
-            }`}
+            onClick={handlePrint}
+            className="px-3.5 sm:px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-md shadow-indigo-600/25 active:scale-95 transition-all cursor-pointer"
           >
-            <Layers size={13} />
-            <span>Ölçü</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setMobileView('advanced')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all shrink-0 cursor-pointer ${
-              mobileView === 'advanced'
-                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs'
-                : 'text-slate-600 dark:text-slate-400'
-            }`}
-          >
-            <Settings2 size={13} />
-            <span>Ayarlar</span>
+            <Printer size={15} />
+            <span>Yazdır</span>
           </button>
         </div>
+      </div>
 
-        {/* Modal Main Area: Responsive Layout (Mobile: Tab Based, Desktop: Split Screen) */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
-          
-          {/* MOBILE CONTENT CONTAINER */}
-          <div className="flex-1 flex flex-col md:hidden overflow-hidden">
-            {mobileView === 'preview' && renderPreviewStage()}
-            {mobileView === 'fields' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
-                {renderFieldsTab()}
-              </div>
-            )}
-            {mobileView === 'dimensions' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
-                {renderDimensionsTab()}
-              </div>
-            )}
-            {mobileView === 'advanced' && (
-              <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-12">
-                {renderAdvancedTab()}
-              </div>
-            )}
-          </div>
+      {/* 2. Ana İçerik Alanı: Mobilde tam ekran sekme değişimi, Masaüstünde çift kolon canlı düzenleme */}
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+        {/* MOBİL İÇERİK: Seçili alt menü sekmesini tam ekran ferah gösterir */}
+        <div className="flex-1 flex flex-col md:hidden overflow-hidden">
+          {activeTab === 'preview' && renderPreviewStage()}
+          {activeTab === 'fields' && (
+            <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-24">
+              {renderFieldsTab()}
+            </div>
+          )}
+          {activeTab === 'dimensions' && (
+            <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-24">
+              {renderDimensionsTab()}
+            </div>
+          )}
+          {activeTab === 'advanced' && (
+            <div className="flex-1 p-4 overflow-y-auto bg-white dark:bg-slate-900 pb-24">
+              {renderAdvancedTab()}
+            </div>
+          )}
+        </div>
 
-          {/* DESKTOP CONTENT CONTAINER: Left Stage + Right Bento Form */}
-          <div className="hidden md:flex flex-1 flex-row overflow-hidden w-full">
-            {/* LEFT: Live Stage */}
-            <div className="flex-1 border-r border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+        {/* MASAÜSTÜ İÇERİK: Önizleme sekmesinde tam sahne, Alanlar/Ölçü/Ayarlar sekmesinde canlı sol önizleme + sağ form */}
+        <div className="hidden md:flex flex-1 flex-row overflow-hidden w-full">
+          {activeTab === 'preview' ? (
+            <div className="flex-1 overflow-hidden flex flex-col w-full h-full">
               {renderPreviewStage()}
             </div>
-
-            {/* RIGHT: Bento Settings Panel */}
-            <div className="w-[400px] lg:w-[440px] bg-white dark:bg-slate-900 flex flex-col h-full overflow-hidden">
-              {/* Tab Navigation */}
-              <div className="flex border-b border-slate-200 dark:border-slate-800 px-4 pt-2.5 bg-slate-50/70 dark:bg-slate-950/60">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('fields')}
-                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                    activeTab === 'fields'
-                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Sliders size={14} />
-                  Alanlar
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('dimensions')}
-                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                    activeTab === 'dimensions'
-                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Layers size={14} />
-                  Ölçü
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('advanced')}
-                  className={`pb-2 px-3 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
-                    activeTab === 'advanced'
-                      ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <Settings2 size={14} />
-                  Ayarlar
-                </button>
+          ) : (
+            <>
+              {/* Sol: Canlı Önizleme Sahnesi */}
+              <div className="flex-1 border-r border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col">
+                {renderPreviewStage()}
               </div>
 
-              {/* Tab Body */}
-              <div className="flex-1 p-4 sm:p-5 overflow-y-auto space-y-4">
+              {/* Sağ: Aktif Sekme Formu */}
+              <div className="w-[420px] lg:w-[460px] bg-white dark:bg-slate-900 flex flex-col h-full overflow-hidden p-5 overflow-y-auto pb-24">
                 {activeTab === 'fields' && renderFieldsTab()}
                 {activeTab === 'dimensions' && renderDimensionsTab()}
                 {activeTab === 'advanced' && renderAdvancedTab()}
               </div>
-
-              {/* Desktop Bottom Footer: Sadece ikincil aksiyonlar (Kaydet & Kapat) - Yazdır butonu üstte tek */}
-              <div className="p-3 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer"
-                >
-                  Vazgeç
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleSaveCustom}
-                  className="px-3.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-                >
-                  {isSavedNotice ? <Check size={14} className="text-emerald-500" /> : <Save size={14} />}
-                  <span>{isSavedNotice ? 'Kaydedildi' : 'Şablonu Kaydet'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
+            </>
+          )}
         </div>
-
       </div>
 
-      {/* Persistent Offscreen Master Print Target */}
+      {/* 3. ALT MENÜ: Diğer sayfalardaki minimalist yuvarlak floating alt menü */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)]">
+        <button
+          type="button"
+          onClick={() => setActiveTab('preview')}
+          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+            activeTab === 'preview'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+          }`}
+        >
+          <Eye size={15} />
+          <span>Önizleme</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('fields')}
+          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+            activeTab === 'fields'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+          }`}
+        >
+          <Edit3 size={15} />
+          <span>Alanlar</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('dimensions')}
+          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+            activeTab === 'dimensions'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+          }`}
+        >
+          <Layers size={15} />
+          <span>Ölçü</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('advanced')}
+          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+            activeTab === 'advanced'
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+              : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+          }`}
+        >
+          <Settings2 size={15} />
+          <span>Ayarlar</span>
+        </button>
+      </div>
+
+      {/* Yazdırma ve Dışa Aktarma İçin Gizli Yüksek Çözünürlüklü Şablon */}
       <div
         style={{
           position: 'fixed',
@@ -918,6 +797,3 @@ export const TemplateEditorModal: React.FC<TemplateEditorModalProps> = ({
     </div>
   );
 };
-
-
-

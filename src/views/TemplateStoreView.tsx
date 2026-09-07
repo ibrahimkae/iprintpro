@@ -334,6 +334,23 @@ export function TemplateStoreView({
     setIsEditorOpen(false);
   };
 
+  // Bağımsız Sayfa: Şablon düzenleme açıkken arka plandaki mağaza görünmez ve kaydırılmaz
+  if (isEditorOpen && activeTemplate) {
+    return (
+      <TemplateEditorModal
+        template={activeTemplate}
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        onSaveAsCustom={handleSaveAsCustom}
+        onPrintDirect={handleDirectPrintFromModal}
+        initialWidthMm={selectedDimension.widthMm}
+        initialPaperStyle={paperStyle}
+        isFavorite={favorites.includes(activeTemplate.id)}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    );
+  }
+
   return (
     <div className="space-y-4 pb-24 max-w-7xl mx-auto w-full">
       {/* 1. Üst Bar: MAĞAZA İÇİN AYRI, KEŞFET İÇİN ULTRA-MİNİMALİST */}
@@ -718,21 +735,6 @@ export function TemplateStoreView({
           </div>
         )}
       </div>
-
-      {/* Şablon Düzenleme & Form Modalı */}
-      {isEditorOpen && activeTemplate && (
-        <TemplateEditorModal
-          template={activeTemplate}
-          isOpen={isEditorOpen}
-          onClose={() => setIsEditorOpen(false)}
-          onSaveAsCustom={handleSaveAsCustom}
-          onPrintDirect={handleDirectPrintFromModal}
-          initialWidthMm={selectedDimension.widthMm}
-          initialPaperStyle={paperStyle}
-          isFavorite={favorites.includes(activeTemplate.id)}
-          onToggleFavorite={handleToggleFavorite}
-        />
-      )}
 
       {/* Keşfet Detay & Kullanıcı Bilgisi Modalı */}
       {selectedCommunityItem && (
