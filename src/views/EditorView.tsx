@@ -1032,28 +1032,28 @@ export function EditorView(p: EditorViewProps) {
       <AnimatePresence>
         {activeBottomMenu && (
           <>
-            {/* Soft Backdrop to close when clicking outside */}
+            {/* Soft Backdrop to close when clicking outside without blurring background text */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 bg-black/20 dark:bg-black/40 backdrop-blur-[1px]"
+              className="fixed inset-0 z-40 bg-black/10 dark:bg-black/30 pointer-events-auto"
               onClick={() => setActiveBottomMenu(null)}
             />
 
-            {/* Floating In-Place Panel Container */}
+            {/* Floating In-Place Panel Container - Same compact size matching font menu */}
             <motion.div
-              initial={{ opacity: 0, y: 15, scale: 0.96 }}
+              initial={{ opacity: 0, y: 12, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 15, scale: 0.96 }}
-              transition={{ duration: 0.18 }}
-              className="fixed bottom-18 sm:bottom-20 left-3 right-3 sm:left-auto sm:right-auto sm:w-[480px] sm:left-1/2 sm:-translate-x-1/2 z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-3.5 max-h-[72vh] overflow-y-auto space-y-3"
+              exit={{ opacity: 0, y: 12, scale: 0.97 }}
+              transition={{ duration: 0.16 }}
+              className="fixed bottom-14 sm:bottom-15 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[420px] z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-3 max-h-[295px] overflow-y-auto space-y-2.5"
             >
               {/* 1. FONT & YAZI BİÇİMİ MENÜSÜ */}
               {activeBottomMenu === 'font' && (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {/* Panel Başlığı */}
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
                       <Type size={14} className="text-teal-600" />
                       <span>Font & Yazı Biçimi</span>
@@ -1162,7 +1162,7 @@ export function EditorView(p: EditorViewProps) {
                   </div>
 
                   {/* Karakter Stilleri */}
-                  <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="space-y-1 pt-1.5 border-t border-slate-100 dark:border-slate-800">
                     <Label className="text-[10px] font-bold uppercase text-slate-500">Karakter Biçimi</Label>
                     <div className="grid grid-cols-4 gap-1.5">
                       <Button
@@ -1210,11 +1210,11 @@ export function EditorView(p: EditorViewProps) {
                 </div>
               )}
 
-              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ */}
+              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ - Font Menüsü ile Aynı Boyut ve Kompakt Düzen */}
               {activeBottomMenu === 'paragraph' && (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {/* Panel Başlığı */}
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
                       <AlignLeft size={14} className="text-teal-600" />
                       <span>Paragraf & Hizalama</span>
@@ -1229,7 +1229,7 @@ export function EditorView(p: EditorViewProps) {
                     </button>
                   </div>
 
-                  {/* Hizalama Butonları */}
+                  {/* 1. Satır: Hizalama Butonları */}
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase text-slate-500">Metin Hizalama</Label>
                     <div className="grid grid-cols-4 gap-1">
@@ -1238,7 +1238,7 @@ export function EditorView(p: EditorViewProps) {
                         variant={p.alignment === 'left' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => p.setAlignment('left')}
-                        className={`h-8 rounded-lg cursor-pointer ${p.alignment === 'left' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
+                        className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'left' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
                         title="Sola Yasla"
                       >
                         <AlignLeft size={13} className="mr-1" /> Sola
@@ -1248,7 +1248,7 @@ export function EditorView(p: EditorViewProps) {
                         variant={p.alignment === 'center' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => p.setAlignment('center')}
-                        className={`h-8 rounded-lg cursor-pointer ${p.alignment === 'center' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
+                        className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'center' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
                         title="Ortala"
                       >
                         <AlignCenter size={13} className="mr-1" /> Orta
@@ -1258,7 +1258,7 @@ export function EditorView(p: EditorViewProps) {
                         variant={p.alignment === 'right' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => p.setAlignment('right')}
-                        className={`h-8 rounded-lg cursor-pointer ${p.alignment === 'right' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
+                        className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'right' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
                         title="Sağa Yasla"
                       >
                         <AlignRight size={13} className="mr-1" /> Sağa
@@ -1268,7 +1268,7 @@ export function EditorView(p: EditorViewProps) {
                         variant={p.alignment === 'justify' ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => p.setAlignment('justify')}
-                        className={`h-8 rounded-lg cursor-pointer ${p.alignment === 'justify' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
+                        className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'justify' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
                         title="İki Yana Yasla"
                       >
                         <AlignJustify size={13} className="mr-1" /> Yay
@@ -1276,81 +1276,87 @@ export function EditorView(p: EditorViewProps) {
                     </div>
                   </div>
 
-                  {/* Harf Dönüşümü */}
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-bold uppercase text-slate-500">Harf Dönüşümü</Label>
-                    <div className="grid grid-cols-3 gap-1">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => transformText('upper', e)}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
-                      >
-                        BÜYÜK
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => transformText('lower', e)}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
-                      >
-                        küçük
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => transformText('title', e)}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
-                      >
-                        Baş Harf
-                      </Button>
+                  {/* 2. Satır: Satır Aralığı & Harf Dönüşümü (Kompakt 2 Sütun) */}
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                    {/* Satır Aralığı */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
+                          <MoveVertical size={11} className="text-slate-500" /> Aralık
+                        </Label>
+                        <span className="text-[9px] font-mono font-bold text-teal-600 dark:text-teal-400">{activeLineHeight}x</span>
+                      </div>
+                      <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/60">
+                        {[
+                          { label: '1.15', val: 1.15, title: 'Sıkışık' },
+                          { label: '1.35', val: 1.35, title: 'Normal' },
+                          { label: '1.6', val: 1.6, title: 'Rahat' },
+                          { label: '1.9', val: 1.9, title: 'Geniş' }
+                        ].map(lh => (
+                          <button
+                            key={lh.val}
+                            type="button"
+                            onClick={() => setLineHeight(lh.val)}
+                            title={lh.title}
+                            className={`flex-1 py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer ${
+                              activeLineHeight === lh.val
+                                ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            {lh.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Satır Aralığı */}
-                  <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
-                        <MoveVertical size={12} className="text-slate-600 dark:text-slate-400" /> Satır Aralığı
-                      </Label>
-                      <span className="text-[9px] font-mono text-slate-400">{activeLineHeight}x</span>
-                    </div>
-                    <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/60">
-                      {[
-                        { label: 'Sıkışık', val: 1.15 },
-                        { label: 'Normal', val: 1.35 },
-                        { label: 'Rahat', val: 1.6 },
-                        { label: 'Geniş', val: 1.9 }
-                      ].map(lh => (
-                        <button
-                          key={lh.val}
+                    {/* Harf Dönüşümü */}
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase text-slate-500">Harf Dönüşümü</Label>
+                      <div className="grid grid-cols-3 gap-1">
+                        <Button
                           type="button"
-                          onClick={() => setLineHeight(lh.val)}
-                          className={`flex-1 py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer ${
-                            activeLineHeight === lh.val
-                              ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs'
-                              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                          }`}
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => transformText('upper', e)}
+                          className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer p-0"
+                          title="Tümünü BÜYÜK yap"
                         >
-                          {lh.label}
-                        </button>
-                      ))}
+                          ABC
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => transformText('lower', e)}
+                          className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer p-0"
+                          title="Tümünü küçük yap"
+                        >
+                          abc
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => transformText('title', e)}
+                          className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer p-0"
+                          title="Baş Harf Büyüt"
+                        >
+                          Abc
+                        </Button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Paragraf & Liste Biçimleri */}
-                  <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <Label className="text-[10px] font-bold uppercase text-slate-500">Paragraf & Liste Düzeni</Label>
+                  {/* 3. Satır: Paragraf & Liste Biçimleri (Kompakt) */}
+                  <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <div className="grid grid-cols-4 gap-1">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={toggleBulletList}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
+                        className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
                         title="Madde İşaretli Liste"
                       >
                         <List size={12} className="mr-1 text-slate-600 dark:text-slate-400" /> Madde
@@ -1360,7 +1366,7 @@ export function EditorView(p: EditorViewProps) {
                         variant="outline"
                         size="sm"
                         onClick={toggleNumberedList}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
+                        className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
                         title="Sıralı Liste"
                       >
                         <ListOrdered size={12} className="mr-1 text-slate-600 dark:text-slate-400" /> Sıralı
@@ -1370,7 +1376,7 @@ export function EditorView(p: EditorViewProps) {
                         variant="outline"
                         size="sm"
                         onClick={(e) => handleIndent(true, e)}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
+                        className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
                         title="Girinti Ekle"
                       >
                         <Indent size={12} className="mr-1 text-slate-600 dark:text-slate-400" /> Girinti
@@ -1380,50 +1386,53 @@ export function EditorView(p: EditorViewProps) {
                         variant="outline"
                         size="sm"
                         onClick={(e) => handleIndent(false, e)}
-                        className="h-8 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
+                        className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
                         title="Girintiyi Kaldır"
                       >
                         <Outdent size={12} className="mr-1 text-slate-600 dark:text-slate-400" /> Kaldır
                       </Button>
                     </div>
-                    <div className="flex items-center gap-1.5 pt-1 flex-wrap">
+                    <div className="grid grid-cols-3 gap-1 pt-0.5">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={toggleChecklist}
-                        className="h-7 text-[9.5px] px-2 font-bold rounded-md bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+                        className="h-6.5 text-[9px] px-1 font-bold rounded-md bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer truncate"
+                        title="Onay Kutusu Ekle"
                       >
-                        [ ] Onay Kutusu Ekle
+                        [✓] Kontrol
                       </Button>
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={(e) => handleParagraphSpacing('add', e)}
-                        className="h-7 text-[9.5px] px-2 font-bold rounded-md bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer"
+                        className="h-6.5 text-[9px] px-1 font-bold rounded-md bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 cursor-pointer truncate"
+                        title="Paragraf Boşluğu Ekle"
                       >
-                        + Paragraf Boşluğu
+                        + Boşluk
                       </Button>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={(e) => handleParagraphSpacing('remove', e)}
-                        className="h-7 text-[9.5px] px-2 font-bold text-slate-500 hover:text-slate-800 cursor-pointer"
+                        className="h-6.5 text-[9px] px-1 font-bold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer truncate"
+                        title="Boşlukları Temizle"
                       >
-                        Boşlukları Temizle
+                        Boşluk Sil
                       </Button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* 3. ARAÇLAR, ŞABLONLAR & TASLAKLAR MENÜSÜ */}
+              {/* 3. ARAÇLAR, ŞABLONLAR & TASLAKLAR MENÜSÜ - Font Menüsü ile Aynı Boyut ve Kompakt Düzen */}
               {activeBottomMenu === 'tools' && (
-                <div className="space-y-2.5">
+                <div className="space-y-2">
                   {/* Panel Başlığı */}
-                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+                  <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
                       <Sparkles size={14} className="text-teal-600" />
                       <span>Hızlı Araçlar, Şablonlar & Taslaklar</span>
@@ -1443,21 +1452,21 @@ export function EditorView(p: EditorViewProps) {
                     <button
                       type="button"
                       onClick={() => setActiveToolTab('tools')}
-                      className={`py-1 text-[11px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'tools' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
+                      className={`py-1 text-[10.5px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'tools' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
                     >
                       ⚡ Hızlı Ekle
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveToolTab('text_templates')}
-                      className={`py-1 text-[11px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'text_templates' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
+                      className={`py-1 text-[10.5px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'text_templates' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
                     >
                       📝 Şablonlar
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveToolTab('drafts')}
-                      className={`py-1 text-[11px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'drafts' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
+                      className={`py-1 text-[10.5px] font-bold rounded-md transition-all text-center cursor-pointer ${activeToolTab === 'drafts' ? 'bg-white dark:bg-slate-900 text-teal-700 dark:text-teal-300 shadow-xs' : 'text-slate-600 dark:text-slate-400'}`}
                     >
                       📂 Taslak ({savedDrafts.length})
                     </button>
@@ -1465,11 +1474,11 @@ export function EditorView(p: EditorViewProps) {
 
                   {/* 1. HIZLI EKLE TABI */}
                   {activeToolTab === 'tools' && (
-                    <div className="space-y-2.5 pt-1">
+                    <div className="space-y-1.5 pt-0.5">
                       {/* Tarih, Görev, Fiş, Fatura Toplam */}
-                      <div className="space-y-1">
+                      <div className="space-y-0.5">
                         <Label className="text-[9px] font-bold uppercase text-slate-500">Hızlı Metin Öğeleri</Label>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+                        <div className="grid grid-cols-4 gap-1">
                           <Button
                             type="button"
                             variant="outline"
@@ -1479,113 +1488,114 @@ export function EditorView(p: EditorViewProps) {
                               const dStr = `Tarih: ${now.toLocaleDateString('tr-TR')} ${now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}\n`;
                               insertTextAtCursor(dStr, e);
                             }}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-teal-400 cursor-pointer"
+                            className="h-7 text-[9.5px] px-1 font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-teal-400 cursor-pointer truncate"
+                            title="Tarih & Saat Ekle"
                           >
-                            <Calendar size={11} className="mr-1 text-teal-600" /> Tarih & Saat
+                            <Calendar size={11} className="mr-0.5 text-teal-600 shrink-0" /> Tarih/Saat
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('[ ] Görev Kalemi\n', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-400 cursor-pointer"
+                            className="h-7 text-[9.5px] px-1 font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-400 cursor-pointer truncate"
+                            title="[ ] Görev Kalemi Ekle"
                           >
-                            <CheckSquare size={11} className="mr-1 text-indigo-600" /> [ ] Görev
+                            <CheckSquare size={11} className="mr-0.5 text-indigo-600 shrink-0" /> [ ] Görev
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('Ürün Adı ............ 0.00 ₺\n', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer"
+                            className="h-7 text-[9.5px] px-1 font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer truncate"
+                            title="Fiş Satırı Ekle"
                           >
-                            <Hash size={11} className="mr-1 text-amber-600" /> Fiş Satırı
+                            <Hash size={11} className="mr-0.5 text-amber-600 shrink-0" /> Fiş Satırı
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('TOPLAM TUTAR ........ 0.00 ₺\n', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-emerald-400 cursor-pointer"
+                            className="h-7 text-[9.5px] px-1 font-bold rounded-lg bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-emerald-400 cursor-pointer truncate"
+                            title="Toplam Tutar Satırı Ekle"
                           >
-                            <ShoppingCart size={11} className="mr-1 text-emerald-600" /> Toplam Satırı
+                            <ShoppingCart size={11} className="mr-0.5 text-emerald-600 shrink-0" /> Toplam
                           </Button>
                         </div>
                       </div>
 
                       {/* Ayırıcı Çizgiler */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-[9px] font-bold uppercase text-slate-500">Dekoratif Ayırıcı Çizgiler</Label>
-                          <span className="text-[9px] text-slate-400 font-medium">Uzatmak için tekrar basın</span>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1">
+                      <div className="space-y-0.5">
+                        <Label className="text-[9px] font-bold uppercase text-slate-500">Ayırıcı Çizgiler</Label>
+                        <div className="grid grid-cols-4 gap-1">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('──────', e)}
-                            className="h-7 text-[10px] px-2 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-teal-400 cursor-pointer"
+                            className="h-6.5 text-[9.5px] px-1 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-teal-400 cursor-pointer"
                             title="Düz Çizgi"
                           >
-                            ────── Düz Parça
+                            ──────
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('══════', e)}
-                            className="h-7 text-[10px] px-2 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-400 cursor-pointer"
+                            className="h-6.5 text-[9.5px] px-1 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-indigo-400 cursor-pointer"
                             title="Çift Çizgi"
                           >
-                            ══════ Çift Parça
+                            ══════
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('- - - ', e)}
-                            className="h-7 text-[10px] px-2 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer"
+                            className="h-6.5 text-[9.5px] px-1 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-amber-400 cursor-pointer"
                             title="Kesikli Çizgi"
                           >
-                            - - - Kesikli
+                            - - -
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('• • • ', e)}
-                            className="h-7 text-[10px] px-2 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-purple-400 cursor-pointer"
+                            className="h-6.5 text-[9.5px] px-1 rounded-lg font-mono font-bold bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-purple-400 cursor-pointer"
                             title="Noktalı Çizgi"
                           >
-                            • • • Noktalı
+                            • • •
                           </Button>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1 pt-0.5">
+                        <div className="grid grid-cols-3 gap-1 pt-0.5">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('────────────────────────\n', e)}
-                            className="h-6 text-[9px] px-1.5 rounded-md font-mono cursor-pointer"
+                            className="h-6 text-[9px] px-1 rounded-md font-mono cursor-pointer truncate"
                           >
-                            ─── Tam Düz Satır
+                            ── Tam Satır
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('════════════════════════\n', e)}
-                            className="h-6 text-[9px] px-1.5 rounded-md font-mono cursor-pointer"
+                            className="h-6 text-[9px] px-1 rounded-md font-mono cursor-pointer truncate"
                           >
-                            ═══ Tam Çift Satır
+                            ══ Çift Satır
                           </Button>
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={(e) => insertTextAtCursor('┌────────────────────────┐\n│      BAŞLIK ALANI      │\n└────────────────────────┘\n', e)}
-                            className="h-6 text-[9px] px-1.5 rounded-md font-mono font-bold col-span-2 sm:col-span-1 cursor-pointer"
+                            className="h-6 text-[9px] px-1 rounded-md font-mono font-bold cursor-pointer truncate"
                           >
                             [ ║ Kutu Başlık ║ ]
                           </Button>
@@ -1593,15 +1603,14 @@ export function EditorView(p: EditorViewProps) {
                       </div>
 
                       {/* Hızlı Harf & Boşluk Temizleme */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[9px] font-bold uppercase text-slate-500">Hızlı Metin Temizliği</Label>
+                      <div className="space-y-0.5 pt-0.5 border-t border-slate-100 dark:border-slate-800">
                         <div className="grid grid-cols-2 gap-1">
                           <Button 
                             type="button" 
                             variant="ghost" 
                             size="sm" 
                             onClick={(e) => transformText('trim', e)} 
-                            className="h-7 text-[10px] border border-slate-200 dark:border-slate-700 font-bold cursor-pointer"
+                            className="h-6.5 text-[9.5px] border border-slate-200 dark:border-slate-700 font-bold cursor-pointer"
                           >
                             Boşlukları Temizle
                           </Button>
@@ -1610,7 +1619,7 @@ export function EditorView(p: EditorViewProps) {
                             variant="ghost" 
                             size="sm" 
                             onClick={() => setShowClearConfirm(true)} 
-                            className="h-7 text-[10px] border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-bold cursor-pointer"
+                            className="h-6.5 text-[9.5px] border border-red-200 dark:border-red-900/60 text-red-600 dark:text-red-400 font-bold cursor-pointer"
                           >
                             <Trash2 size={11} className="mr-1" /> Tümünü Temizle
                           </Button>
@@ -1621,38 +1630,37 @@ export function EditorView(p: EditorViewProps) {
 
                   {/* 2. METİN ŞABLONLARI TABI */}
                   {activeToolTab === 'text_templates' && (
-                    <div className="space-y-3 pt-1">
+                    <div className="space-y-1.5 pt-0.5 max-h-[180px] overflow-y-auto pr-0.5">
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase text-slate-500">Metin Şablonları</span>
+                        <span className="text-[9.5px] font-bold uppercase text-slate-500">Metin Şablonları</span>
                         <Button
                           type="button"
                           size="sm"
                           variant="outline"
                           onClick={openNewCustomTemplateModal}
-                          className="h-6 text-[10px] px-2 font-bold text-teal-600 border-teal-200 dark:border-teal-800 bg-teal-50/60 dark:bg-teal-950/40 rounded-lg gap-1 cursor-pointer"
+                          className="h-5.5 text-[9px] px-2 font-bold text-teal-600 border-teal-200 dark:border-teal-800 bg-teal-50/60 dark:bg-teal-950/40 rounded-md gap-1 cursor-pointer"
                         >
-                          <Plus size={11} /> Özel Şablon Ekle
+                          <Plus size={10} /> Özel Ekle
                         </Button>
                       </div>
 
                       {/* Hazır Sistem Şablonları */}
-                      <div className="space-y-1.5">
-                        <span className="text-[9px] font-bold uppercase text-slate-400">Hazır Kalıplar</span>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                      <div className="space-y-1">
+                        <div className="grid grid-cols-1 gap-1">
                           {DEFAULT_TEXT_TEMPLATES.map((tpl) => {
                             const Icon = tpl.icon;
                             return (
                               <div
                                 key={tpl.id}
-                                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2 hover:border-teal-300 dark:hover:border-teal-700 transition-all"
+                                className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1.5 hover:border-teal-300 dark:hover:border-teal-700 transition-all"
                               >
-                                <div className="flex items-center gap-2 overflow-hidden">
+                                <div className="flex items-center gap-1.5 overflow-hidden">
                                   <div className="p-1 rounded-md bg-teal-100 dark:bg-teal-900/60 text-teal-700 dark:text-teal-300 shrink-0">
-                                    <Icon size={13} />
+                                    <Icon size={12} />
                                   </div>
                                   <div className="flex flex-col overflow-hidden">
-                                    <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">{tpl.name}</span>
-                                    <span className="text-[9px] text-slate-400 truncate">{tpl.content.split('\n')[0]}</span>
+                                    <span className="text-[10.5px] font-bold text-slate-800 dark:text-slate-200 truncate">{tpl.name}</span>
+                                    <span className="text-[8.5px] text-slate-400 truncate">{tpl.content.split('\n')[0]}</span>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
@@ -1668,7 +1676,7 @@ export function EditorView(p: EditorViewProps) {
                                         p.setText(tpl.content);
                                       }
                                     }}
-                                    className="h-6 px-1.5 text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer"
+                                    className="h-5.5 px-2 text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer"
                                   >
                                     Ekle
                                   </Button>
@@ -1680,25 +1688,25 @@ export function EditorView(p: EditorViewProps) {
                       </div>
 
                       {/* Kişisel Şablonlar */}
-                      <div className="space-y-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
+                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
                         <span className="text-[9px] font-bold uppercase text-slate-400">
                           Kişisel Şablonlarım ({customTemplates.length})
                         </span>
 
                         {customTemplates.length === 0 ? (
-                          <div className="text-center py-2.5 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
-                            <p className="text-[10px] text-slate-500">Henüz özel metin şablonu eklenmedi.</p>
+                          <div className="text-center py-2 bg-slate-50 dark:bg-slate-800/30 rounded-lg border border-dashed border-slate-200 dark:border-slate-700">
+                            <p className="text-[9.5px] text-slate-500">Henüz özel metin şablonu eklenmedi.</p>
                           </div>
                         ) : (
-                          <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1">
+                          <div className="space-y-1">
                             {customTemplates.map((tpl) => (
                               <div
                                 key={tpl.id}
-                                className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2"
+                                className="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-1.5"
                               >
                                 <div className="flex flex-col overflow-hidden">
-                                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">{tpl.name}</span>
-                                  <span className="text-[9px] text-slate-400 truncate">{tpl.content.slice(0, 45)}...</span>
+                                  <span className="text-[10.5px] font-bold text-slate-800 dark:text-slate-200 truncate">{tpl.name}</span>
+                                  <span className="text-[8.5px] text-slate-400 truncate">{tpl.content.slice(0, 35)}...</span>
                                 </div>
                                 <div className="flex items-center gap-1 shrink-0">
                                   <Button
@@ -1713,7 +1721,7 @@ export function EditorView(p: EditorViewProps) {
                                         p.setText(tpl.content);
                                       }
                                     }}
-                                    className="h-6 px-1.5 text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer"
+                                    className="h-5.5 px-2 text-[9px] font-bold text-teal-600 dark:text-teal-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 cursor-pointer"
                                   >
                                     Ekle
                                   </Button>
@@ -1722,20 +1730,20 @@ export function EditorView(p: EditorViewProps) {
                                     size="icon"
                                     variant="ghost"
                                     onClick={(e) => openEditCustomTemplateModal(tpl, e)}
-                                    className="h-6 w-6 text-slate-500 hover:text-slate-800 rounded-md cursor-pointer"
+                                    className="h-5.5 w-5.5 text-slate-500 hover:text-slate-800 rounded-md cursor-pointer"
                                     title="Düzenle"
                                   >
-                                    <Edit2 size={11} />
+                                    <Edit2 size={10} />
                                   </Button>
                                   <Button
                                     type="button"
                                     size="icon"
                                     variant="ghost"
                                     onClick={(e) => handleDeleteCustomTemplate(tpl.id, e)}
-                                    className="h-6 w-6 text-red-400 hover:text-red-600 rounded-md cursor-pointer"
+                                    className="h-5.5 w-5.5 text-red-400 hover:text-red-600 rounded-md cursor-pointer"
                                     title="Sil"
                                   >
-                                    <Trash2 size={11} />
+                                    <Trash2 size={10} />
                                   </Button>
                                 </div>
                               </div>
@@ -1748,31 +1756,30 @@ export function EditorView(p: EditorViewProps) {
 
                   {/* 3. TASLAKLARIM TABI */}
                   {activeToolTab === 'drafts' && (
-                    <div className="space-y-2 pt-1">
+                    <div className="space-y-1.5 pt-0.5 max-h-[180px] overflow-y-auto pr-0.5">
                       <div className="flex items-center justify-between">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Kayıtlı Taslaklarınız</Label>
-                        <Button type="button" size="sm" variant="ghost" onClick={saveCurrentDraft} className="h-6 text-[10px] px-2 text-teal-600 font-bold cursor-pointer">
-                          <Plus size={11} className="mr-1" /> Yeni Taslak Kaydet
+                        <Label className="text-[9.5px] font-bold uppercase text-slate-500">Kayıtlı Taslaklarınız</Label>
+                        <Button type="button" size="sm" variant="ghost" onClick={saveCurrentDraft} className="h-5.5 text-[9.5px] px-2 text-teal-600 font-bold cursor-pointer">
+                          <Plus size={10} className="mr-1" /> Yeni Kaydet
                         </Button>
                       </div>
 
                       {savedDrafts.length === 0 ? (
-                        <div className="text-center py-4 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
-                          <Bookmark size={20} className="mx-auto text-slate-400 mb-1" />
-                          <p className="text-[11px] text-slate-500">Henüz kayıtlı taslak bulunmuyor.</p>
-                          <p className="text-[9px] text-slate-400">Yazdığınız metinleri daha sonra tek tıkla kullanmak için kaydedebilirsiniz.</p>
+                        <div className="text-center py-3 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                          <Bookmark size={18} className="mx-auto text-slate-400 mb-1" />
+                          <p className="text-[10px] text-slate-500">Henüz kayıtlı taslak bulunmuyor.</p>
                         </div>
                       ) : (
-                        <div className="max-h-44 overflow-y-auto space-y-1.5 pr-1">
+                        <div className="space-y-1">
                           {savedDrafts.map((draft) => (
                             <div
                               key={draft.id}
                               onClick={(e) => loadDraft(draft, e)}
-                              className="flex items-center justify-between p-2 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all group"
+                              className="flex items-center justify-between p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-teal-50 dark:hover:bg-teal-950/40 border border-slate-200 dark:border-slate-700 cursor-pointer transition-all group"
                             >
                               <div className="flex flex-col overflow-hidden mr-2">
-                                <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{draft.title}</span>
-                                <span className="text-[9px] text-slate-400 truncate">{draft.payload?.text?.slice(0, 40) || ''}...</span>
+                                <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 truncate">{draft.title}</span>
+                                <span className="text-[8.5px] text-slate-400 truncate">{draft.payload?.text?.slice(0, 35) || ''}...</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Button
@@ -1780,9 +1787,9 @@ export function EditorView(p: EditorViewProps) {
                                   size="icon"
                                   variant="ghost"
                                   onClick={(e) => deleteDraft(draft.id, e)}
-                                  className="h-6 w-6 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
+                                  className="h-5.5 w-5.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
                                 >
-                                  <Trash2 size={12} />
+                                  <Trash2 size={11} />
                                 </Button>
                               </div>
                             </div>
