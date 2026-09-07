@@ -1179,88 +1179,33 @@ export function EditorView(p: EditorViewProps) {
               transition={{ duration: 0.16 }}
               className="fixed bottom-14 sm:bottom-15 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[420px] z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-3 max-h-[295px] overflow-y-auto space-y-2.5"
             >
-              {/* 1. FONT & YAZI BİÇİMİ MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı) */}
+              {/* 1. FONT & YAZI BİÇİMİ MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı / Minimalist Noktalar) */}
               {activeBottomMenu === 'font' && (
                 <div
-                  className="space-y-2.5"
+                  className="space-y-2"
                   onTouchStart={handleTouchStart}
                   onTouchEnd={(e) => handleTouchEnd(e, 'font')}
                 >
-                  {/* Panel Başlığı ve Sayfalama Kontrolleri */}
+                  {/* Minimalist Panel Başlığı */}
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
                       <Type size={14} className="text-teal-600" />
                       <span>Font & Biçim</span>
-                      <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500 ml-1">
-                        ({fontMenuPage === 1 ? '1/2 Boyut' : '2/2 Espas'})
-                      </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      {/* Sayfa Geçiş Butonları */}
-                      <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700/60">
-                        <button
-                          type="button"
-                          onClick={() => setFontMenuPage(1)}
-                          disabled={fontMenuPage === 1}
-                          className={`p-1 rounded-md transition-colors cursor-pointer ${
-                            fontMenuPage === 1
-                              ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
-                          }`}
-                          title="1. Sayfa: Font & Boyut"
-                        >
-                          <ChevronLeft size={12} />
-                        </button>
-
-                        <div className="flex items-center gap-1 px-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setFontMenuPage(1)}
-                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                              fontMenuPage === 1 ? 'w-3 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600'
-                            }`}
-                            title="Sayfa 1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setFontMenuPage(2)}
-                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                              fontMenuPage === 2 ? 'w-3 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600'
-                            }`}
-                            title="Sayfa 2: Espas & Efektler"
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setFontMenuPage(2)}
-                          disabled={fontMenuPage === 2}
-                          className={`p-1 rounded-md transition-colors cursor-pointer ${
-                            fontMenuPage === 2
-                              ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
-                          }`}
-                          title="2. Sayfa: Espas & Efektler"
-                        >
-                          <ChevronRight size={12} />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setActiveBottomMenu(null)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        title="Kapat"
-                      >
-                        <X size={15} />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveBottomMenu(null)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      title="Kapat"
+                    >
+                      <X size={15} />
+                    </button>
                   </div>
 
                   {/* SAYFA 1: FONT AİLESİ, BOYUT, KARAKTER BİÇİMİ */}
                   {fontMenuPage === 1 && (
-                    <div className="space-y-2.5 animate-in fade-in-50 duration-150">
+                    <div className="space-y-2 animate-in fade-in-50 duration-150">
                       {/* Font Ailesi */}
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
@@ -1400,29 +1345,14 @@ export function EditorView(p: EditorViewProps) {
                           </Button>
                         </div>
                       </div>
-
-                      {/* 2. Sayfaya Geçiş İpucu & Butonu */}
-                      <button
-                        type="button"
-                        onClick={() => setFontMenuPage(2)}
-                        className="w-full flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg py-1.5 px-2.5 border border-slate-200/70 dark:border-slate-700/60 cursor-pointer transition-colors"
-                      >
-                        <span className="flex items-center gap-1">
-                          <Space size={12} className="text-teal-600" />
-                          <span>Harf Aralığı (Espas) & Özel Stiller</span>
-                        </span>
-                        <span className="flex items-center gap-0.5 font-bold text-teal-600 dark:text-teal-400">
-                          2. Sayfa <ChevronRight size={12} />
-                        </span>
-                      </button>
                     </div>
                   )}
 
                   {/* SAYFA 2: HARF ARALIĞI (ESPAS), TİPOGRAFİ ÖNAYARLARI VE ÇERÇEVELER */}
                   {fontMenuPage === 2 && (
-                    <div className="space-y-2.5 animate-in fade-in-50 duration-150">
+                    <div className="space-y-2 animate-in fade-in-50 duration-150">
                       {/* Harf Aralığı (Espas) Ayarı */}
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
                             <Space size={11} className="text-slate-500" /> Harf Aralığı (Espas)
@@ -1535,103 +1465,56 @@ export function EditorView(p: EditorViewProps) {
                           </button>
                         </div>
                       </div>
-
-                      {/* 1. Sayfaya Geri Dönüş Butonu */}
-                      <button
-                        type="button"
-                        onClick={() => setFontMenuPage(1)}
-                        className="w-full flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg py-1.5 px-2.5 border border-slate-200/70 dark:border-slate-700/60 cursor-pointer transition-colors"
-                      >
-                        <span className="flex items-center gap-0.5 font-bold text-teal-600 dark:text-teal-400">
-                          <ChevronLeft size={12} /> 1. Sayfa
-                        </span>
-                        <span>Temel Font Seçimine Dön</span>
-                      </button>
                     </div>
                   )}
+
+                  {/* Minimalist Sayfa Noktaları (• •) */}
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setFontMenuPage(1)}
+                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                        fontMenuPage === 1 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                      }`}
+                      title="1. Sayfa"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFontMenuPage(2)}
+                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                        fontMenuPage === 2 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                      }`}
+                      title="2. Sayfa"
+                    />
+                  </div>
                 </div>
               )}
 
-              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı) */}
+              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı / Minimalist Noktalar) */}
               {activeBottomMenu === 'paragraph' && (
                 <div
                   className="space-y-2"
                   onTouchStart={handleTouchStart}
                   onTouchEnd={(e) => handleTouchEnd(e, 'paragraph')}
                 >
-                  {/* Panel Başlığı ve Sayfalama Kontrolleri */}
+                  {/* Minimalist Panel Başlığı */}
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
                     <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-100">
                       <AlignLeft size={14} className="text-teal-600" />
                       <span>Paragraf & Hizalama</span>
-                      <span className="text-[10px] font-normal text-slate-400 dark:text-slate-500 ml-1">
-                        ({paragraphMenuPage === 1 ? '1/2 Hizalama' : '2/2 Liste & Çizgi'})
-                      </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      {/* Sayfa Geçiş Butonları */}
-                      <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5 border border-slate-200 dark:border-slate-700/60">
-                        <button
-                          type="button"
-                          onClick={() => setParagraphMenuPage(1)}
-                          disabled={paragraphMenuPage === 1}
-                          className={`p-1 rounded-md transition-colors cursor-pointer ${
-                            paragraphMenuPage === 1
-                              ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
-                          }`}
-                          title="1. Sayfa: Hizalama & Harf Dönüşümü"
-                        >
-                          <ChevronLeft size={12} />
-                        </button>
-
-                        <div className="flex items-center gap-1 px-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setParagraphMenuPage(1)}
-                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                              paragraphMenuPage === 1 ? 'w-3 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600'
-                            }`}
-                            title="Sayfa 1"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setParagraphMenuPage(2)}
-                            className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                              paragraphMenuPage === 2 ? 'w-3 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600'
-                            }`}
-                            title="Sayfa 2: Listeler & Bölücüler"
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setParagraphMenuPage(2)}
-                          disabled={paragraphMenuPage === 2}
-                          className={`p-1 rounded-md transition-colors cursor-pointer ${
-                            paragraphMenuPage === 2
-                              ? 'text-slate-300 dark:text-slate-600 cursor-not-allowed'
-                              : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
-                          }`}
-                          title="2. Sayfa: Listeler & Bölücüler"
-                        >
-                          <ChevronRight size={12} />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setActiveBottomMenu(null)}
-                        className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-                        title="Kapat"
-                      >
-                        <X size={15} />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveBottomMenu(null)}
+                      className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                      title="Kapat"
+                    >
+                      <X size={15} />
+                    </button>
                   </div>
 
-                  {/* SAYFA 1: HİZALAMA, SATIR ARALIĞI, HARF DÖNÜŞÜMÜ (Görsel Geri Bildirimli Tuşlar) */}
+                  {/* SAYFA 1: HİZALAMA, SATIR ARALIĞI, HARF DÖNÜŞÜMÜ */}
                   {paragraphMenuPage === 1 && (
                     <div className="space-y-2 animate-in fade-in-50 duration-150">
                       {/* 1. Satır: Hizalama Butonları */}
@@ -1715,7 +1598,7 @@ export function EditorView(p: EditorViewProps) {
                           </div>
                         </div>
 
-                        {/* Harf Dönüşümü (Tuş Üzerinde Görsel Efekt & Titreşim Olmadan Basılma Geri Bildirimi) */}
+                        {/* Harf Dönüşümü (Tuş Üzerinde Görsel Geri Bildirim) */}
                         <div className="space-y-1">
                           <Label className="text-[10px] font-bold uppercase text-slate-500">Harf Dönüşümü</Label>
                           <div className="grid grid-cols-3 gap-1">
@@ -1787,21 +1670,6 @@ export function EditorView(p: EditorViewProps) {
                           </div>
                         </div>
                       </div>
-
-                      {/* 2. Sayfaya Geçiş Butonu */}
-                      <button
-                        type="button"
-                        onClick={() => setParagraphMenuPage(2)}
-                        className="w-full flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg py-1.5 px-2.5 border border-slate-200/70 dark:border-slate-700/60 cursor-pointer transition-colors mt-0.5"
-                      >
-                        <span className="flex items-center gap-1">
-                          <List size={12} className="text-teal-600" />
-                          <span>Listeler, Girinti & Rulo Ayırıcı Çizgileri</span>
-                        </span>
-                        <span className="flex items-center gap-0.5 font-bold text-teal-600 dark:text-teal-400">
-                          2. Sayfa <ChevronRight size={12} />
-                        </span>
-                      </button>
                     </div>
                   )}
 
@@ -1950,20 +1818,28 @@ export function EditorView(p: EditorViewProps) {
                           </button>
                         </div>
                       </div>
-
-                      {/* 1. Sayfaya Geri Dönüş Butonu */}
-                      <button
-                        type="button"
-                        onClick={() => setParagraphMenuPage(1)}
-                        className="w-full flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 bg-slate-50 dark:bg-slate-800/60 rounded-lg py-1.5 px-2.5 border border-slate-200/70 dark:border-slate-700/60 cursor-pointer transition-colors"
-                      >
-                        <span className="flex items-center gap-0.5 font-bold text-teal-600 dark:text-teal-400">
-                          <ChevronLeft size={12} /> 1. Sayfa
-                        </span>
-                        <span>Hizalama & Harf Ayarlarına Dön</span>
-                      </button>
                     </div>
                   )}
+
+                  {/* Minimalist Sayfa Noktaları (• •) */}
+                  <div className="flex items-center justify-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setParagraphMenuPage(1)}
+                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                        paragraphMenuPage === 1 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                      }`}
+                      title="1. Sayfa"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setParagraphMenuPage(2)}
+                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                        paragraphMenuPage === 2 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
+                      }`}
+                      title="2. Sayfa"
+                    />
+                  </div>
                 </div>
               )}
 

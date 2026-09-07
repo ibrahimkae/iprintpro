@@ -52,8 +52,10 @@ import {
   Square,
   CheckSquare,
   RectangleHorizontal,
-  Lock
+  Lock,
+  Minus
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { calculateLabelDimensions } from '../lib/dimension-utils';
 import { RulerDimensionBadge } from './RulerDimensionBadge';
 import { playChiptunePreview, CHIPTUNE_PRESETS } from '../lib/chiptune-engine';
@@ -62,6 +64,7 @@ import { renderArchiveLabel } from '../lib/barcode-archive-renderer';
 import { BarcodeArchiveManager } from './BarcodeArchiveManager';
 
 interface QRGeneratorProps {
+  onBack?: () => void;
   onGenerate: (img: string) => void;
   onDirectPrint?: (img: string) => void;
   onBatchPrint?: (images: string[]) => void;
@@ -72,6 +75,7 @@ interface QRGeneratorProps {
 export type BarcodeDesignStyle = 'minimal_square' | 'minimal_wide' | 'standard' | 'shelf' | 'price' | 'shipping' | 'apparel' | 'pure';
 
 export const QRGenerator: React.FC<QRGeneratorProps> = ({ 
+  onBack,
   onGenerate, 
   onDirectPrint, 
   onBatchPrint,
@@ -82,6 +86,11 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
   const [activeTab, setActiveTab] = useState<'create' | 'scan' | 'batch' | 'archive'>('create');
   // Collapsible configuration state (defaults to closed)
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+
+  // Etiket & Tuval Boyutlandırma Paneli (Kolaj Tasarımcısı Stili)
+  const [showDimensionPanel, setShowDimensionPanel] = useState(false);
+  const [isAutoHeight, setIsAutoHeight] = useState(true);
+  const [customHeightPx, setCustomHeightPx] = useState<number>(400);
 
   // Archive Matching State for Scanner
   const [scannedArchive, setScannedArchive] = useState<BarcodeArchiveRecord | null>(null);
@@ -305,7 +314,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           includetext: includeText,
           textsize: 13,
           textxalign: 'center',
-          textgaps: 1,
+          textyoffset: -4,
           paddingwidth: 2
         });
 
@@ -350,6 +359,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           includetext: true,
           textsize: 10,
           textxalign: 'center',
+          textyoffset: -3,
           paddingwidth: 2
         });
       } catch (e) {
@@ -362,6 +372,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
             includetext: true,
             textsize: 10,
             textxalign: 'center',
+            textyoffset: -3,
             paddingwidth: 2
           });
         } catch (_) {}
@@ -586,7 +597,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           includetext: includeText,
           textsize: Math.round(13 * scaleFactor),
           textxalign: 'center',
-          textgaps: 1,
+          textyoffset: -4,
           paddingwidth: 2
         });
       } catch (err) {
@@ -609,9 +620,11 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       }
     }
 
-    // Calculate Dynamic Canvas Height according to layout style and paper presets
+    // Calculate Dynamic Canvas Height according to layout style, custom dimensions, and paper presets
     let canvasHeight = 0;
-    if (labelWidthPreset === 800) {
+    if (!isAutoHeight && customHeightPx > 0) {
+      canvasHeight = customHeightPx;
+    } else if (labelWidthPreset === 800) {
       canvasHeight = 1200; // 10x15 cm Dikey
     } else if (labelWidthPreset === 1200) {
       canvasHeight = 800; // 15x10 cm Yatay
@@ -1050,6 +1063,8 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
     qrLevel,
     barcodeHeight,
     includeText,
+    isAutoHeight,
+    customHeightPx,
     activeTab
   ]);
 
@@ -1178,7 +1193,50 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
   };
 
   return (
-    <div className="space-y-2.5 pb-2 max-w-4xl mx-auto w-full">
+    <div className="space-y-2 pb-2 max-w-4xl mx-auto w-full">
+      {/* Üst İşlem Çubuğu (İptal - Sol, Taslak & Baskı Önizle - Sağa Yaslı) */}
+      <div className="flex items-center justify-between gap-2">
+        {onBack ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="rounded-lg text-xs h-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+          >
+            <X size={14} className="mr-1" /> İptal
+          </Button>
+        ) : <div />}
+
+        <div className="flex items-center gap-1.5 ml-auto">
+          {/* Taslak Kaydet / Güncelle butonu */}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleSaveQRDraft}
+            className={`h-8 rounded-lg text-xs font-bold gap-1 cursor-pointer ${
+              activeDraft
+                ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300'
+            }`}
+            title="Taslak Olarak Kaydet"
+          >
+            <Bookmark size={13} className={activeDraft ? 'text-amber-600' : 'text-slate-500'} />
+            <span className="hidden sm:inline">{activeDraft ? 'Taslağı Güncelle' : 'Taslak'}</span>
+          </Button>
+
+          {/* Baskı Önizle & Yazdır Butonu (İptal butonunun hizasında sağa yaslı) */}
+          <Button
+            type="button"
+            onClick={handleDirectPrintSingle}
+            className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3.5 h-8 shadow-xs gap-1.5 cursor-pointer"
+          >
+            <Printer size={13} /> Baskı Önizle & Yazdır
+          </Button>
+        </div>
+      </div>
+
       <Card className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs rounded-xl space-y-2.5">
       {/* Active Draft Banner */}
       {activeDraft && (
@@ -1211,54 +1269,241 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
         </div>
       )}
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
-        {/* Üst Sekme Seçici - Kompakt & Tam Sığan Izgara */}
-        <TabsList className="grid grid-cols-4 w-full h-8 sm:h-9 p-0.5 sm:p-1 bg-slate-100 dark:bg-slate-800 rounded-lg mb-2">
-          <TabsTrigger value="create" className="text-[11px] sm:text-xs font-bold gap-1 px-1 sm:px-2 py-1 cursor-pointer truncate">
-            <Barcode size={13} className="shrink-0" />
-            <span className="truncate">Oluştur</span>
-          </TabsTrigger>
-          <TabsTrigger value="scan" className="text-[11px] sm:text-xs font-bold gap-1 px-1 sm:px-2 py-1 cursor-pointer truncate">
-            <Camera size={13} className="shrink-0" />
-            <span className="truncate">Tara</span>
-          </TabsTrigger>
-          <TabsTrigger value="batch" className="text-[11px] sm:text-xs font-bold gap-1 px-1 sm:px-2 py-1 cursor-pointer truncate">
-            <Layers size={13} className="shrink-0" />
-            <span className="truncate">Sıralı</span>
-          </TabsTrigger>
-          <TabsTrigger value="archive" className="text-[11px] sm:text-xs font-bold gap-1 px-1 sm:px-2 py-1 cursor-pointer truncate">
-            <Boxes size={13} className="shrink-0" />
-            <span className="truncate">Arşiv</span>
-          </TabsTrigger>
-        </TabsList>
-
         {/* 1. OLUŞTURUCU TAB */}
         <TabsContent value="create" className="space-y-2.5 pt-0">
           {/* Canlı Görsel Önizleme Kartı (EN BAŞTA) */}
           <div className="p-2.5 bg-slate-100 dark:bg-slate-800/60 rounded-xl flex flex-col items-center justify-center">
             <div className="w-full max-w-[360px] flex flex-col items-center">
-              {/* Tek Satır Canlı Önizleme & Ölçü Başlığı */}
+              {/* Tek Satır Canlı Önizleme & Ölçü Başlığı - Tıklanabilir Tuval Ölçülendirme Butonu */}
               {(() => {
-                const h = orientation === 'vertical' ? (labelWidthPreset === 800 ? 1200 : 400) : (labelWidthPreset === 800 ? 800 : 300);
-                const wCm = labelWidthPreset <= 400 ? '5.7' : labelWidthPreset <= 600 ? '8.0' : labelWidthPreset === 800 ? '10.0' : '15.0';
-                const hCm = (h / 80).toFixed(2).replace(/\.?0+$/, '');
+                const effectiveWidth = labelWidthPreset;
+                const effectiveHeight = !isAutoHeight && customHeightPx > 0
+                  ? customHeightPx
+                  : (orientation === 'vertical' ? (labelWidthPreset === 800 ? 1200 : (designStyle === 'minimal_square' ? effectiveWidth : 400)) : (labelWidthPreset === 800 ? 800 : (designStyle === 'minimal_square' ? effectiveWidth : 300)));
+                const wCm = (effectiveWidth / 80).toFixed(1).replace(/\.0$/, '');
+                const hCm = (effectiveHeight / 80).toFixed(1).replace(/\.0$/, '');
                 return (
-                  <div className="w-full bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700/80 shadow-2xs select-none mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowDimensionPanel(!showDimensionPanel)}
+                    className="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700 shadow-2xs select-none mb-1.5 transition-all cursor-pointer group"
+                    title="Etiket ölçülerini ve tuval boyutunu ayarlamak için tıklayın"
+                  >
                     <div className="flex items-center gap-1.5">
-                      <Eye size={12} className="text-teal-600 dark:text-teal-400 shrink-0" />
+                      <Eye size={13} className="text-teal-600 dark:text-teal-400 shrink-0" />
                       <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
                         {orientation === 'vertical' ? 'Dikey Önizleme' : 'Yatay Önizleme'}
                       </span>
+                      <span className="text-[9px] px-1.5 py-0.2 bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-sans font-bold rounded-md border border-teal-200 dark:border-teal-800">
+                        {isAutoHeight ? 'Otomatik Ölçek' : 'Özel Boyut'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Ruler size={11} className="text-amber-500 shrink-0" />
+                      <Ruler size={12} className="text-amber-500 shrink-0" />
                       <span className="text-[10px] uppercase font-bold text-slate-400">Ölçü:</span>
                       <span className="text-[11px] font-bold text-teal-700 dark:text-teal-300">
                         {wCm}cm × {hCm}cm
                       </span>
+                      {showDimensionPanel ? (
+                        <ChevronUp size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                      ) : (
+                        <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                      )}
                     </div>
-                  </div>
+                  </button>
                 );
               })()}
+
+              {/* Açılır Kapanır Tuval / Etiket Boyutlandırma Paneli (Kolaj Tasarımcısı Stili) */}
+              <AnimatePresence>
+                {showDimensionPanel && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0, y: -5 }}
+                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -5 }}
+                    className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-md space-y-2 text-xs overflow-hidden mb-2"
+                  >
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <Ruler size={13} className="text-teal-600 dark:text-teal-400" />
+                        <span className="font-extrabold text-xs text-slate-800 dark:text-slate-200">
+                          Tuval Ölçüsü Ayarla (cm)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowDimensionPanel(false)}
+                        className="p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {/* Genişlik (En) - cm */}
+                      <div className="space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">
+                          <span>Genişlik (En)</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold">
+                            {(labelWidthPreset / 80).toFixed(1).replace(/\.0$/, '')} cm
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setLabelWidthPreset((prev) => Math.max(160, prev - 40))}
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            title="-0.5 cm"
+                          >
+                            <Minus size={11} />
+                          </button>
+                          <div className="flex-1 flex items-center justify-center gap-0.5 font-mono">
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={(labelWidthPreset / 80).toFixed(1).replace(/\.0$/, '')}
+                              onChange={(e) => {
+                                const cm = parseFloat(e.target.value) || 2;
+                                setLabelWidthPreset(Math.max(160, Math.round(cm * 80)));
+                              }}
+                              className="w-12 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50"
+                            />
+                            <span className="text-[10px] text-slate-500 font-bold">cm</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setLabelWidthPreset((prev) => Math.min(1600, prev + 40))}
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            title="+0.5 cm"
+                          >
+                            <Plus size={11} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Yükseklik (Boy) - cm */}
+                      <div className="space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">
+                          <span>Yükseklik (Boy)</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold">
+                            {isAutoHeight
+                              ? 'Otomatik'
+                              : `${(customHeightPx / 80).toFixed(1).replace(/\.0$/, '')} cm`}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAutoHeight(false);
+                              setCustomHeightPx((prev) => Math.max(80, (prev || 400) - 40));
+                            }}
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            title="-0.5 cm"
+                          >
+                            <Minus size={11} />
+                          </button>
+                          <div className="flex-1 flex items-center justify-center gap-0.5 font-mono">
+                            <input
+                              type="number"
+                              step="0.1"
+                              value={isAutoHeight ? '' : (customHeightPx / 80).toFixed(1).replace(/\.0$/, '')}
+                              placeholder="Oto"
+                              onChange={(e) => {
+                                const cm = parseFloat(e.target.value);
+                                if (!isNaN(cm) && cm > 0) {
+                                  setIsAutoHeight(false);
+                                  setCustomHeightPx(Math.max(80, Math.round(cm * 80)));
+                                } else {
+                                  setIsAutoHeight(true);
+                                }
+                              }}
+                              className="w-12 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50 placeholder:text-slate-400"
+                            />
+                            <span className="text-[10px] text-slate-500 font-bold">cm</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAutoHeight(false);
+                              setCustomHeightPx((prev) => Math.min(2400, (prev || 400) + 40));
+                            }}
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            title="+0.5 cm"
+                          >
+                            <Plus size={11} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Hızlı En Kısayolları */}
+                    <div className="flex items-center gap-1 pt-0.5 overflow-x-auto no-scrollbar">
+                      <span className="text-[10px] text-slate-500 font-bold shrink-0">Hızlı En:</span>
+                      {[
+                        { label: '4.8 cm', w: 384 },
+                        { label: '5.7 cm', w: 456 },
+                        { label: '7.2 cm', w: 576 },
+                        { label: '10 cm', w: 800 },
+                        { label: '15 cm', w: 1200 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.w}
+                          type="button"
+                          onClick={() => setLabelWidthPreset(preset.w)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors shrink-0 cursor-pointer ${
+                            labelWidthPreset === preset.w
+                              ? 'bg-teal-600 text-white shadow-xs'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Hızlı Boy Kısayolları ve Otomatik Ölçek Butonu */}
+                    <div className="flex items-center gap-1 pt-0.5 overflow-x-auto no-scrollbar">
+                      <span className="text-[10px] text-slate-500 font-bold shrink-0">Hızlı Boy:</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsAutoHeight(true)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors shrink-0 cursor-pointer ${
+                          isAutoHeight
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        Otomatik Ölçek
+                      </button>
+                      {[
+                        { label: '3 cm', h: 240 },
+                        { label: '4 cm', h: 320 },
+                        { label: '5 cm', h: 400 },
+                        { label: '7 cm', h: 560 },
+                        { label: '10 cm', h: 800 },
+                        { label: '15 cm', h: 1200 },
+                      ].map((preset) => (
+                        <button
+                          key={preset.h}
+                          type="button"
+                          onClick={() => {
+                            setIsAutoHeight(false);
+                            setCustomHeightPx(preset.h);
+                          }}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors shrink-0 cursor-pointer ${
+                            !isAutoHeight && customHeightPx === preset.h
+                              ? 'bg-teal-600 text-white shadow-xs'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                          }`}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Termal Kağıt Görünümü */}
               {previewDataUrl ? (
@@ -1279,16 +1524,6 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Aksiyon Butonları (Önizlemenin hemen altında - Tek ve Tam Genişlik) */}
-          <div className="pt-0.5">
-            <Button
-              onClick={handleDirectPrintSingle}
-              className="w-full gap-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg h-9 font-bold text-xs shadow-2xs cursor-pointer"
-            >
-              <Printer size={14} /> Baskı Önizle & Yazdır
-            </Button>
           </div>
 
           {/* DÜZENLEME KISMI - AÇILIR KAPANIR AKORDİYON MENÜ (Varsayılan olarak KAPALI) */}

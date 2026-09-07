@@ -2837,10 +2837,8 @@ function AppShell() {
 
           {activeView === 'tools' && (
             <motion.div key="tools" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Button variant="ghost" onClick={() => setActiveView('menu')} className="rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs dark:text-slate-200 text-xs h-7 px-2.5"><X size={13} className="mr-1" /> {t('cancel')}</Button>
-              </div>
               <QRGenerator 
+                onBack={() => setActiveView('menu')}
                 activeDraft={activeDraft}
                 onClearActiveDraft={() => setActiveDraft(null)}
                 onGenerate={(img) => {
