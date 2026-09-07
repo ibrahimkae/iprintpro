@@ -200,3 +200,10 @@
   color: #ffffff !important;
   color-scheme: dark !important;
 }
+
+/* Dark mode comfortable thermal brightness (eye comfort without degrading crisp barcodes) */
+.dark .thermal-container:not(.print-monochrome),
+.dark .thermal-paper:not(.print-monochrome) {
+  filter: brightness(0.93) contrast(1.02);
+}
+

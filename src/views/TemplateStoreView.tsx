@@ -566,11 +566,6 @@ export function TemplateStoreView({
                 {filteredTemplates.length} Sonuç
               </span>
             </div>
-
-            <div className="text-[11px] font-mono flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Önizleme: <strong>{selectedDimension.name}</strong></span>
-            </div>
           </div>
 
           {/* 2'li Izgara Dizilimi (Seçilen Kart Tam Genişler) */}

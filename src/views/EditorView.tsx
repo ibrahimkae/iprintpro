@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, type Variants } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button';
 import { Card } from '../components/ui/card';
@@ -332,9 +332,23 @@ export function EditorView(p: EditorViewProps) {
   // Harf Dönüşümü Tuş Üzeri Anlık Görsel Geri Bildirim State'i (Bildirimsiz micro-interaction)
   const [transformFeedback, setTransformFeedback] = useState<'upper' | 'lower' | 'title' | null>(null);
 
-  // Menü İçi Sayfalama State'leri (Pagination)
+  // Menü İçi Sayfalama State'leri ve 3D Yön Animasyonu (Pagination with 3D Slide Carousel)
   const [fontMenuPage, setFontMenuPage] = useState<number>(1);
+  const [fontSlideDirection, setFontSlideDirection] = useState<number>(1);
   const [paragraphMenuPage, setParagraphMenuPage] = useState<number>(1);
+  const [paragraphSlideDirection, setParagraphSlideDirection] = useState<number>(1);
+
+  const changeFontPage = (newPage: number) => {
+    if (newPage === fontMenuPage) return;
+    setFontSlideDirection(newPage > fontMenuPage ? 1 : -1);
+    setFontMenuPage(newPage);
+  };
+
+  const changeParagraphPage = (newPage: number) => {
+    if (newPage === paragraphMenuPage) return;
+    setParagraphSlideDirection(newPage > paragraphMenuPage ? 1 : -1);
+    setParagraphMenuPage(newPage);
+  };
 
   // Touch Swipe ref for mobile gesture pagination
   const touchStartXRef = useRef<number | null>(null);
@@ -828,7 +842,7 @@ export function EditorView(p: EditorViewProps) {
     }
   };
 
-  // Touch / Swipe Gestures for Menu Pagination
+  // Touch / Swipe Gestures for Menu Pagination with 3D animation
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartXRef.current = e.touches[0].clientX;
   };
@@ -838,15 +852,15 @@ export function EditorView(p: EditorViewProps) {
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartXRef.current - touchEndX;
     touchStartXRef.current = null;
-    if (Math.abs(diff) > 40) {
+    if (Math.abs(diff) > 35) {
       if (diff > 0) {
-        // Sola kaydırdı -> sonraki sayfa
-        if (menu === 'font') setFontMenuPage(2);
-        if (menu === 'paragraph') setParagraphMenuPage(2);
+        // Sola kaydırdı -> 2. sayfaya geç (kart sağdan 3D açı ile girer)
+        if (menu === 'font') changeFontPage(2);
+        if (menu === 'paragraph') changeParagraphPage(2);
       } else {
-        // Sağa kaydırdı -> önceki sayfa
-        if (menu === 'font') setFontMenuPage(1);
-        if (menu === 'paragraph') setParagraphMenuPage(1);
+        // Sağa kaydırdı -> 1. sayfaya geç (kart soldan 3D açı ile girer)
+        if (menu === 'font') changeFontPage(1);
+        if (menu === 'paragraph') changeParagraphPage(1);
       }
     }
   };
@@ -926,6 +940,41 @@ export function EditorView(p: EditorViewProps) {
     letterSpacing: `${activeLetterSpacing}px`
   };
 
+  // 3D Sliding Carousel Card Animation Variants (Yandan 3D dönerek ve derinlik ile gelen kart)
+  const card3dVariants: Variants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 80 : -80,
+      rotateY: direction > 0 ? 20 : -20,
+      opacity: 0,
+      scale: 0.95,
+      transformPerspective: 900
+    }),
+    center: {
+      x: 0,
+      rotateY: 0,
+      opacity: 1,
+      scale: 1,
+      transformPerspective: 900,
+      transition: {
+        type: 'spring' as const,
+        stiffness: 380,
+        damping: 26,
+        mass: 0.75
+      }
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? -80 : 80,
+      rotateY: direction > 0 ? -20 : 20,
+      opacity: 0,
+      scale: 0.95,
+      transformPerspective: 900,
+      transition: {
+        duration: 0.15,
+        ease: 'easeInOut'
+      }
+    })
+  };
+
   return (
     <motion.div key="editor" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-3 pb-24">
       {/* Active Draft Indicator Banner */}
@@ -966,7 +1015,7 @@ export function EditorView(p: EditorViewProps) {
           variant="ghost" 
           size="sm" 
           onClick={p.onBack} 
-          className="rounded-lg text-xs h-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs"
+          className="rounded-lg text-xs h-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs cursor-pointer"
         >
           <X size={14} className="mr-1" /> {t('cancel')}
         </Button>
@@ -987,7 +1036,11 @@ export function EditorView(p: EditorViewProps) {
                 }
               }
             }}
-            className={`h-8 w-8 rounded-lg ${p.showHtmlEditor ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 border-indigo-200' : 'text-slate-500 border-slate-200 dark:border-slate-800'}`}
+            className={`h-8 w-8 rounded-lg cursor-pointer ${
+              p.showHtmlEditor 
+                ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-950/80 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700' 
+                : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 shadow-xs'
+            }`}
             title="HTML Şablon Motoru"
           >
             <Code size={14}/>
@@ -1000,7 +1053,7 @@ export function EditorView(p: EditorViewProps) {
               e.preventDefault();
               setShowClearConfirm(true);
             }}
-            className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border-slate-200 dark:border-slate-800 cursor-pointer"
+            className="h-8 w-8 rounded-lg bg-white dark:bg-slate-900 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 border-slate-200 dark:border-slate-800 shadow-xs cursor-pointer"
             title="Sayfa İçeriğini Temizle"
           >
             <Trash2 size={14} />
@@ -1011,7 +1064,7 @@ export function EditorView(p: EditorViewProps) {
               e.preventDefault();
               p.onGeneratePreview();
             }}
-            className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3.5 h-8 shadow-xs gap-1 cursor-pointer"
+            className="rounded-lg bg-teal-600 hover:bg-teal-700 dark:bg-teal-600 text-white font-bold text-xs px-3.5 h-8 shadow-xs gap-1 cursor-pointer"
           >
             <Printer size={13} /> Yazdır
           </Button>
@@ -1171,15 +1224,16 @@ export function EditorView(p: EditorViewProps) {
               onClick={() => setActiveBottomMenu(null)}
             />
 
-            {/* Floating In-Place Panel Container - Same compact size matching font menu */}
+            {/* Floating In-Place Panel Container with 3D Entrance */}
             <motion.div
-              initial={{ opacity: 0, y: 12, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.97 }}
-              transition={{ duration: 0.16 }}
-              className="fixed bottom-14 sm:bottom-15 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[420px] z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-3 max-h-[295px] overflow-y-auto space-y-2.5"
+              initial={{ opacity: 0, y: 16, scale: 0.95, rotateX: -8 }}
+              animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+              exit={{ opacity: 0, y: 14, scale: 0.95, rotateX: 6 }}
+              transition={{ type: 'spring', damping: 26, stiffness: 360 }}
+              style={{ transformPerspective: 1000 }}
+              className="fixed bottom-14 sm:bottom-15 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:w-[420px] z-50 bg-white/98 dark:bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-3 max-h-[305px] overflow-y-auto overflow-x-hidden space-y-2.5"
             >
-              {/* 1. FONT & YAZI BİÇİMİ MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı / Minimalist Noktalar) */}
+              {/* 1. FONT & YAZI BİÇİMİ MENÜSÜ (2 Sayfalı / 3D Yatay Kaydırmalı / Minimalist Noktalar) */}
               {activeBottomMenu === 'font' && (
                 <div
                   className="space-y-2"
@@ -1203,276 +1257,295 @@ export function EditorView(p: EditorViewProps) {
                     </button>
                   </div>
 
-                  {/* SAYFA 1: FONT AİLESİ, BOYUT, KARAKTER BİÇİMİ */}
-                  {fontMenuPage === 1 && (
-                    <div className="space-y-2 animate-in fade-in-50 duration-150">
-                      {/* Font Ailesi */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
-                            Font Ailesi
-                          </Label>
-                          <label className="text-[10px] font-bold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer flex items-center gap-0.5">
-                            <span>+ Özel Font</span>
-                            <input type="file" accept=".ttf,.woff,.woff2" onChange={p.handleFontUpload} className="hidden" />
-                          </label>
-                        </div>
-                        <Select value={p.fontFamily} onValueChange={(v) => v && p.setFontFamily(v)}>
-                          <SelectTrigger className="w-full rounded-lg font-bold h-8 text-xs bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
-                            <SelectValue placeholder="Font Seçin" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-lg max-h-72">
-                            {FONT_OPTIONS.map((f) => (
-                              <SelectItem key={f.value} value={f.value} className="py-2 cursor-pointer">
-                                <div className="flex items-center justify-between w-full gap-3">
-                                  <span style={f.style} className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                                    {f.label}
-                                  </span>
-                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-sans shrink-0 font-normal">
-                                    {f.category}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                            {p.customFonts.map(f => (
-                              <SelectItem key={f.name} value={f.name} className="py-2 cursor-pointer">
-                                <div className="flex items-center justify-between w-full gap-3">
-                                  <span style={{ fontFamily: f.name }} className="text-sm font-medium text-teal-600 dark:text-teal-400">
-                                    {f.name}
-                                  </span>
-                                  <span className="text-[10px] text-teal-500/80 font-sans shrink-0 font-normal">
-                                    Özel Yüklenen
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Font Boyutu */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500">Yazı Boyutu</Label>
-                          <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1.5 py-0.2 rounded font-mono">
-                            {p.fontSize}px
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => p.setFontSize(prev => Math.max(10, prev - 1))}
-                            className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 shrink-0 cursor-pointer"
-                            title="Küçült (-1px)"
-                          >
-                            <Minus size={13} />
-                          </Button>
-                          <Input
-                            type="number"
-                            value={p.fontSize}
-                            onChange={e => p.setFontSize(Number(e.target.value) || 24)}
-                            className="h-8 text-center text-xs font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 w-16 shrink-0"
-                          />
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => p.setFontSize(prev => Math.min(180, prev + 1))}
-                            className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 shrink-0 cursor-pointer"
-                            title="Büyüt (+1px)"
-                          >
-                            <Plus size={13} />
-                          </Button>
-                          <div className="flex-1 px-1 flex items-center">
-                            <input
-                              type="range"
-                              min="10"
-                              max="100"
-                              value={p.fontSize}
-                              onChange={(e) => p.setFontSize(Number(e.target.value))}
-                              className="w-full accent-teal-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg"
-                              title={`Boyut: ${p.fontSize}px`}
-                            />
+                  {/* 3D Sliding Carousel Wrapper */}
+                  <div className="relative overflow-hidden py-0.5" style={{ perspective: 1000 }}>
+                    <AnimatePresence mode="wait" custom={fontSlideDirection}>
+                      {fontMenuPage === 1 ? (
+                        <motion.div
+                          key="font-p1"
+                          custom={fontSlideDirection}
+                          variants={card3dVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          className="space-y-2"
+                          style={{ transformStyle: 'preserve-3d' }}
+                        >
+                          {/* Font Ailesi */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
+                                Font Ailesi
+                              </Label>
+                              <label className="text-[10px] font-bold text-teal-600 dark:text-teal-400 hover:underline cursor-pointer flex items-center gap-0.5">
+                                <span>+ Özel Font</span>
+                                <input type="file" accept=".ttf,.woff,.woff2" onChange={p.handleFontUpload} className="hidden" />
+                              </label>
+                            </div>
+                            <Select value={p.fontFamily} onValueChange={(v) => v && p.setFontFamily(v)}>
+                              <SelectTrigger className="w-full rounded-lg font-bold h-8 text-xs bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700">
+                                <SelectValue placeholder="Font Seçin" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-lg max-h-72">
+                                {FONT_OPTIONS.map((f) => (
+                                  <SelectItem key={f.value} value={f.value} className="py-2 cursor-pointer">
+                                    <div className="flex items-center justify-between w-full gap-3">
+                                      <span style={f.style} className="text-sm font-medium text-slate-800 dark:text-slate-100">
+                                        {f.label}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-sans shrink-0 font-normal">
+                                        {f.category}
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                                {p.customFonts.map(f => (
+                                  <SelectItem key={f.name} value={f.name} className="py-2 cursor-pointer">
+                                    <div className="flex items-center justify-between w-full gap-3">
+                                      <span style={{ fontFamily: f.name }} className="text-sm font-medium text-teal-600 dark:text-teal-400">
+                                        {f.name}
+                                      </span>
+                                      <span className="text-[10px] text-teal-500/80 font-sans shrink-0 font-normal">
+                                        Özel Yüklenen
+                                      </span>
+                                    </div>
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Karakter Stilleri */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Karakter Biçimi</Label>
-                        <div className="grid grid-cols-4 gap-1.5">
-                          <Button
-                            type="button"
-                            variant={p.isBold ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setIsBold(!p.isBold)}
-                            className={`h-8 rounded-lg font-bold cursor-pointer ${p.isBold ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Kalın"
-                          >
-                            <Bold size={13} className="mr-1" /> Kalın
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={p.isItalic ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setIsItalic(!p.isItalic)}
-                            className={`h-8 rounded-lg italic cursor-pointer ${p.isItalic ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="İtalik"
-                          >
-                            <Italic size={13} className="mr-1" /> İtalik
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={p.isUnderline ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setIsUnderline(!p.isUnderline)}
-                            className={`h-8 rounded-lg cursor-pointer ${p.isUnderline ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Altı Çizili"
-                          >
-                            <Underline size={13} className="mr-1" /> Altı Çizili
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={isStrikethrough ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => setIsStrikethrough(!isStrikethrough)}
-                            className={`h-8 rounded-lg cursor-pointer ${isStrikethrough ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Üstü Çizili"
-                          >
-                            <Strikethrough size={13} className="mr-1" /> Üstü Çizili
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          {/* Font Boyutu */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-[10px] font-bold uppercase text-slate-500">Yazı Boyutu</Label>
+                              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1.5 py-0.2 rounded font-mono">
+                                {p.fontSize}px
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => p.setFontSize(prev => Math.max(10, prev - 1))}
+                                className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 shrink-0 cursor-pointer text-slate-700 dark:text-slate-200"
+                                title="Küçült (-1px)"
+                              >
+                                <Minus size={13} />
+                              </Button>
+                              <Input
+                                type="number"
+                                value={p.fontSize}
+                                onChange={e => p.setFontSize(Number(e.target.value) || 24)}
+                                className="h-8 text-center text-xs font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 w-16 shrink-0 text-slate-800 dark:text-slate-100"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => p.setFontSize(prev => Math.min(180, prev + 1))}
+                                className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 shrink-0 cursor-pointer text-slate-700 dark:text-slate-200"
+                                title="Büyüt (+1px)"
+                              >
+                                <Plus size={13} />
+                              </Button>
+                              <div className="flex-1 px-1 flex items-center">
+                                <input
+                                  type="range"
+                                  min="10"
+                                  max="100"
+                                  value={p.fontSize}
+                                  onChange={(e) => p.setFontSize(Number(e.target.value))}
+                                  className="w-full accent-teal-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg"
+                                  title={`Boyut: ${p.fontSize}px`}
+                                />
+                              </div>
+                            </div>
+                          </div>
 
-                  {/* SAYFA 2: HARF ARALIĞI (ESPAS), TİPOGRAFİ ÖNAYARLARI VE ÇERÇEVELER */}
-                  {fontMenuPage === 2 && (
-                    <div className="space-y-2 animate-in fade-in-50 duration-150">
-                      {/* Harf Aralığı (Espas) Ayarı */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
-                            <Space size={11} className="text-slate-500" /> Harf Aralığı (Espas)
-                          </Label>
-                          <span className="text-[10px] font-bold font-mono text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1.5 py-0.5 rounded">
-                            {activeLetterSpacing > 0 ? `+${activeLetterSpacing}` : activeLetterSpacing}px
-                          </span>
-                        </div>
+                          {/* Karakter Stilleri */}
+                          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Karakter Biçimi</Label>
+                            <div className="grid grid-cols-4 gap-1.5">
+                              <Button
+                                type="button"
+                                variant={p.isBold ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setIsBold(!p.isBold)}
+                                className={`h-8 rounded-lg font-bold cursor-pointer ${p.isBold ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Kalın"
+                              >
+                                <Bold size={13} className="mr-1" /> Kalın
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={p.isItalic ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setIsItalic(!p.isItalic)}
+                                className={`h-8 rounded-lg italic cursor-pointer ${p.isItalic ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="İtalik"
+                              >
+                                <Italic size={13} className="mr-1" /> İtalik
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={p.isUnderline ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setIsUnderline(!p.isUnderline)}
+                                className={`h-8 rounded-lg cursor-pointer ${p.isUnderline ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Altı Çizili"
+                              >
+                                <Underline size={13} className="mr-1" /> Altı Çizili
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={isStrikethrough ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setIsStrikethrough(!isStrikethrough)}
+                                className={`h-8 rounded-lg cursor-pointer ${isStrikethrough ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Üstü Çizili"
+                              >
+                                <Strikethrough size={13} className="mr-1" /> Üstü Çizili
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="font-p2"
+                          custom={fontSlideDirection}
+                          variants={card3dVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          className="space-y-2"
+                          style={{ transformStyle: 'preserve-3d' }}
+                        >
+                          {/* Harf Aralığı (Espas) Ayarı */}
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
+                                <Space size={11} className="text-slate-500" /> Harf Aralığı (Espas)
+                              </Label>
+                              <span className="text-[10px] font-bold font-mono text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/60 px-1.5 py-0.5 rounded">
+                                {activeLetterSpacing > 0 ? `+${activeLetterSpacing}` : activeLetterSpacing}px
+                              </span>
+                            </div>
 
-                        {/* Hızlı Espas Butonları */}
-                        <div className="grid grid-cols-5 gap-1">
-                          {[
-                            { label: '-1', val: -1, title: 'Sıkı (-1px)' },
-                            { label: '0', val: 0, title: 'Normal (0px)' },
-                            { label: '+1', val: 1, title: 'Geniş (+1px)' },
-                            { label: '+2', val: 2, title: 'Ayrık (+2px)' },
-                            { label: '+4', val: 4, title: 'Geniş Ayrık (+4px)' }
-                          ].map(item => (
-                            <button
-                              key={item.val}
-                              type="button"
-                              onClick={() => setLetterSpacing(item.val)}
-                              title={item.title}
-                              className={`py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer border ${
-                                activeLetterSpacing === item.val
-                                  ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                              }`}
-                            >
-                              {item.label}
-                            </button>
-                          ))}
-                        </div>
+                            {/* Hızlı Espas Butonları */}
+                            <div className="grid grid-cols-5 gap-1">
+                              {[
+                                { label: '-1', val: -1, title: 'Sıkı (-1px)' },
+                                { label: '0', val: 0, title: 'Normal (0px)' },
+                                { label: '+1', val: 1, title: 'Geniş (+1px)' },
+                                { label: '+2', val: 2, title: 'Ayrık (+2px)' },
+                                { label: '+4', val: 4, title: 'Geniş Ayrık (+4px)' }
+                              ].map(item => (
+                                <button
+                                  key={item.val}
+                                  type="button"
+                                  onClick={() => setLetterSpacing(item.val)}
+                                  title={item.title}
+                                  className={`py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer border ${
+                                    activeLetterSpacing === item.val
+                                      ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                                  }`}
+                                >
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
 
-                        {/* Espas Hassas Slider */}
-                        <div className="flex items-center gap-2 pt-0.5">
-                          <span className="text-[9px] font-mono text-slate-400">-2</span>
-                          <input
-                            type="range"
-                            min="-2"
-                            max="8"
-                            step="0.5"
-                            value={activeLetterSpacing}
-                            onChange={(e) => setLetterSpacing(Number(e.target.value))}
-                            className="flex-1 accent-teal-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg"
-                            title={`Espas: ${activeLetterSpacing}px`}
-                          />
-                          <span className="text-[9px] font-mono text-slate-400">+8</span>
-                        </div>
-                      </div>
+                            {/* Espas Hassas Slider */}
+                            <div className="flex items-center gap-2 pt-0.5">
+                              <span className="text-[9px] font-mono text-slate-400">-2</span>
+                              <input
+                                type="range"
+                                min="-2"
+                                max="8"
+                                step="0.5"
+                                value={activeLetterSpacing}
+                                onChange={(e) => setLetterSpacing(Number(e.target.value))}
+                                className="flex-1 accent-teal-600 cursor-pointer h-1.5 bg-slate-200 dark:bg-slate-700 rounded-lg"
+                                title={`Espas: ${activeLetterSpacing}px`}
+                              />
+                              <span className="text-[9px] font-mono text-slate-400">+8</span>
+                            </div>
+                          </div>
 
-                      {/* Hızlı Tipografi Önayarları */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Hızlı Tipografi</Label>
-                        <div className="grid grid-cols-4 gap-1">
-                          <button
-                            type="button"
-                            onClick={(e) => applyTypoPreset('headline', e)}
-                            className="py-1 px-1.5 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="32px Kalın Başlık"
-                          >
-                            Manşet
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => applyTypoPreset('subtitle', e)}
-                            className="py-1 px-1.5 text-[10px] font-medium italic rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="22px İtalik Alt Başlık"
-                          >
-                            Alt Başlık
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => applyTypoPreset('receipt', e)}
-                            className="py-1 px-1.5 text-[10px] font-mono font-medium rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="JetBrains Mono Fiş Metni"
-                          >
-                            Fiş/Kod
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => applyTypoPreset('wide', e)}
-                            className="py-1 px-1.5 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="Ayrık Harfli Vurgulu Başlık"
-                          >
-                            Ayrık
-                          </button>
-                        </div>
-                      </div>
+                          {/* Hızlı Tipografi Önayarları */}
+                          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Hızlı Tipografi</Label>
+                            <div className="grid grid-cols-4 gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => applyTypoPreset('headline', e)}
+                                className="py-1 px-1.5 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="32px Kalın Başlık"
+                              >
+                                Manşet
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => applyTypoPreset('subtitle', e)}
+                                className="py-1 px-1.5 text-[10px] font-medium italic rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="22px İtalik Alt Başlık"
+                              >
+                                Alt Başlık
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => applyTypoPreset('receipt', e)}
+                                className="py-1 px-1.5 text-[10px] font-mono font-medium rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="JetBrains Mono Fiş Metni"
+                              >
+                                Fiş/Kod
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => applyTypoPreset('wide', e)}
+                                className="py-1 px-1.5 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="Ayrık Harfli Vurgulu Başlık"
+                              >
+                                Ayrık
+                              </button>
+                            </div>
+                          </div>
 
-                      {/* Termal Vurgu & Çerçeve */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Termal Vurgu</Label>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={(e) => wrapSelectedText('invert', e)}
-                            className="py-1 px-2 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer text-center"
-                            title="Metni Negatif Vurgu Bloğuna Al"
-                          >
-                            ■ Vurgu Bloğu ■
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => wrapSelectedText('box', e)}
-                            className="py-1 px-2 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer text-center"
-                            title="Metni Çerçeve İçine Al"
-                          >
-                            ╔═ Çerçeveye Al ═╗
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          {/* Termal Vurgu & Çerçeve */}
+                          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Termal Vurgu</Label>
+                            <div className="grid grid-cols-2 gap-1.5">
+                              <button
+                                type="button"
+                                onClick={(e) => wrapSelectedText('invert', e)}
+                                className="py-1 px-2 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer text-center"
+                                title="Metni Negatif Vurgu Bloğuna Al"
+                              >
+                                ■ Vurgu Bloğu ■
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => wrapSelectedText('box', e)}
+                                className="py-1 px-2 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer text-center"
+                                title="Metni Çerçeve İçine Al"
+                              >
+                                ╔═ Çerçeveye Al ═╗
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   {/* Minimalist Sayfa Noktaları (• •) */}
                   <div className="flex items-center justify-center gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setFontMenuPage(1)}
+                      onClick={() => changeFontPage(1)}
                       className={`h-1.5 rounded-full transition-all cursor-pointer ${
                         fontMenuPage === 1 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
                       }`}
@@ -1480,7 +1553,7 @@ export function EditorView(p: EditorViewProps) {
                     />
                     <button
                       type="button"
-                      onClick={() => setFontMenuPage(2)}
+                      onClick={() => changeFontPage(2)}
                       className={`h-1.5 rounded-full transition-all cursor-pointer ${
                         fontMenuPage === 2 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
                       }`}
@@ -1490,7 +1563,7 @@ export function EditorView(p: EditorViewProps) {
                 </div>
               )}
 
-              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ (2 Sayfalı / Yatay Kaydırmalı / Minimalist Noktalar) */}
+              {/* 2. PARAGRAF & HİZALAMA MENÜSÜ (2 Sayfalı / 3D Yatay Kaydırmalı / Minimalist Noktalar) */}
               {activeBottomMenu === 'paragraph' && (
                 <div
                   className="space-y-2"
@@ -1514,318 +1587,337 @@ export function EditorView(p: EditorViewProps) {
                     </button>
                   </div>
 
-                  {/* SAYFA 1: HİZALAMA, SATIR ARALIĞI, HARF DÖNÜŞÜMÜ */}
-                  {paragraphMenuPage === 1 && (
-                    <div className="space-y-2 animate-in fade-in-50 duration-150">
-                      {/* 1. Satır: Hizalama Butonları */}
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Metin Hizalama</Label>
-                        <div className="grid grid-cols-4 gap-1">
-                          <Button
-                            type="button"
-                            variant={p.alignment === 'left' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setAlignment('left')}
-                            className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'left' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Sola Yasla"
-                          >
-                            <AlignLeft size={13} className="mr-1" /> Sola
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={p.alignment === 'center' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setAlignment('center')}
-                            className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'center' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Ortala"
-                          >
-                            <AlignCenter size={13} className="mr-1" /> Orta
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={p.alignment === 'right' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setAlignment('right')}
-                            className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'right' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="Sağa Yasla"
-                          >
-                            <AlignRight size={13} className="mr-1" /> Sağa
-                          </Button>
-                          <Button
-                            type="button"
-                            variant={p.alignment === 'justify' ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => p.setAlignment('justify')}
-                            className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'justify' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700'}`}
-                            title="İki Yana Yasla"
-                          >
-                            <AlignJustify size={13} className="mr-1" /> Yay
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* 2. Satır: Satır Aralığı & Harf Dönüşümü */}
-                      <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        {/* Satır Aralığı */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
-                              <MoveVertical size={11} className="text-slate-500" /> Aralık
-                            </Label>
-                            <span className="text-[9px] font-mono font-bold text-teal-600 dark:text-teal-400">{activeLineHeight}x</span>
-                          </div>
-                          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/60">
-                            {[
-                              { label: '1.15', val: 1.15, title: 'Sıkışık' },
-                              { label: '1.35', val: 1.35, title: 'Normal' },
-                              { label: '1.6', val: 1.6, title: 'Rahat' },
-                              { label: '1.9', val: 1.9, title: 'Geniş' }
-                            ].map(lh => (
-                              <button
-                                key={lh.val}
+                  {/* 3D Sliding Carousel Wrapper */}
+                  <div className="relative overflow-hidden py-0.5" style={{ perspective: 1000 }}>
+                    <AnimatePresence mode="wait" custom={paragraphSlideDirection}>
+                      {paragraphMenuPage === 1 ? (
+                        <motion.div
+                          key="para-p1"
+                          custom={paragraphSlideDirection}
+                          variants={card3dVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          className="space-y-2"
+                          style={{ transformStyle: 'preserve-3d' }}
+                        >
+                          {/* 1. Satır: Hizalama Butonları */}
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Metin Hizalama</Label>
+                            <div className="grid grid-cols-4 gap-1">
+                              <Button
                                 type="button"
-                                onClick={() => setLineHeight(lh.val)}
-                                title={lh.title}
-                                className={`flex-1 py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer ${
-                                  activeLineHeight === lh.val
-                                    ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                                }`}
+                                variant={p.alignment === 'left' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setAlignment('left')}
+                                className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'left' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Sola Yasla"
                               >
-                                {lh.label}
+                                <AlignLeft size={13} className="mr-1" /> Sola
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={p.alignment === 'center' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setAlignment('center')}
+                                className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'center' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Ortala"
+                              >
+                                <AlignCenter size={13} className="mr-1" /> Orta
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={p.alignment === 'right' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setAlignment('right')}
+                                className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'right' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="Sağa Yasla"
+                              >
+                                <AlignRight size={13} className="mr-1" /> Sağa
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={p.alignment === 'justify' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => p.setAlignment('justify')}
+                                className={`h-7.5 text-xs rounded-lg cursor-pointer ${p.alignment === 'justify' ? 'bg-teal-600 text-white' : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200'}`}
+                                title="İki Yana Yasla"
+                              >
+                                <AlignJustify size={13} className="mr-1" /> Yay
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* 2. Satır: Satır Aralığı & Harf Dönüşümü */}
+                          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            {/* Satır Aralığı */}
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-[10px] font-bold uppercase text-slate-500 flex items-center gap-1">
+                                  <MoveVertical size={11} className="text-slate-500" /> Aralık
+                                </Label>
+                                <span className="text-[9px] font-mono font-bold text-teal-600 dark:text-teal-400">{activeLineHeight}x</span>
+                              </div>
+                              <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-0.5 rounded-lg border border-slate-200 dark:border-slate-700/60">
+                                {[
+                                  { label: '1.15', val: 1.15, title: 'Sıkışık' },
+                                  { label: '1.35', val: 1.35, title: 'Normal' },
+                                  { label: '1.6', val: 1.6, title: 'Rahat' },
+                                  { label: '1.9', val: 1.9, title: 'Geniş' }
+                                ].map(lh => (
+                                  <button
+                                    key={lh.val}
+                                    type="button"
+                                    onClick={() => setLineHeight(lh.val)}
+                                    title={lh.title}
+                                    className={`flex-1 py-1 text-[10px] font-bold rounded-md transition-all text-center cursor-pointer ${
+                                      activeLineHeight === lh.val
+                                        ? 'bg-white dark:bg-slate-900 text-teal-600 dark:text-teal-400 shadow-xs'
+                                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                                    }`}
+                                  >
+                                    {lh.label}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Harf Dönüşümü (Tuş Üzerinde Görsel Geri Bildirim) */}
+                            <div className="space-y-1">
+                              <Label className="text-[10px] font-bold uppercase text-slate-500">Harf Dönüşümü</Label>
+                              <div className="grid grid-cols-3 gap-1">
+                                {/* BÜYÜK HARF (ABC) */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => transformText('upper', e)}
+                                  className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
+                                    transformFeedback === 'upper'
+                                      ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
+                                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                  }`}
+                                  title="Tümünü BÜYÜK yap"
+                                >
+                                  {transformFeedback === 'upper' ? (
+                                    <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
+                                      <Check size={11} className="stroke-[3]" /> ABC
+                                    </span>
+                                  ) : (
+                                    <span>ABC</span>
+                                  )}
+                                </Button>
+
+                                {/* küçük harf (abc) */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => transformText('lower', e)}
+                                  className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
+                                    transformFeedback === 'lower'
+                                      ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
+                                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                  }`}
+                                  title="Tümünü küçük yap"
+                                >
+                                  {transformFeedback === 'lower' ? (
+                                    <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
+                                      <Check size={11} className="stroke-[3]" /> abc
+                                    </span>
+                                  ) : (
+                                    <span>abc</span>
+                                  )}
+                                </Button>
+
+                                {/* Baş Harf Büyüt (Abc) */}
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => transformText('title', e)}
+                                  className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
+                                    transformFeedback === 'title'
+                                      ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
+                                      : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                  }`}
+                                  title="Baş Harf Büyüt"
+                                >
+                                  {transformFeedback === 'title' ? (
+                                    <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
+                                      <Check size={11} className="stroke-[3]" /> Abc
+                                    </span>
+                                  ) : (
+                                    <span>Abc</span>
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="para-p2"
+                          custom={paragraphSlideDirection}
+                          variants={card3dVariants}
+                          initial="enter"
+                          animate="center"
+                          exit="exit"
+                          className="space-y-2"
+                          style={{ transformStyle: 'preserve-3d' }}
+                        >
+                          {/* Madde & Liste Biçimleri */}
+                          <div className="space-y-1">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Liste Biçimleri</Label>
+                            <div className="grid grid-cols-5 gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={toggleBulletList}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-0 cursor-pointer"
+                                title="Madde İşaretli Liste"
+                              >
+                                <List size={11} className="mr-0.5 text-teal-600" /> Madde
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={toggleNumberedList}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-0 cursor-pointer"
+                                title="Sıralı Sayı Listesi"
+                              >
+                                <ListOrdered size={11} className="mr-0.5 text-teal-600" /> 1. Sıralı
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={toggleChecklist}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-0 cursor-pointer"
+                                title="Onay Kutusu [ ] Ekle"
+                              >
+                                <CheckSquare size={11} className="mr-0.5 text-teal-600" /> [✓] Onay
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => insertListPrefix('arrow', e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-0 cursor-pointer"
+                                title="Ok İmi Liste (→)"
+                              >
+                                <ArrowRight size={11} className="mr-0.5 text-teal-600" /> → Ok
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => insertListPrefix('star', e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 p-0 cursor-pointer"
+                                title="Yıldız Liste (★)"
+                              >
+                                <Star size={11} className="mr-0.5 text-teal-600" /> ★ Yıldız
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Girinti & Boşluk Düzeni */}
+                          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Girinti & Boşluk</Label>
+                            <div className="grid grid-cols-4 gap-1">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleIndent(true, e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-1 cursor-pointer"
+                                title="4 Boşluk Girinti Ekle"
+                              >
+                                <Indent size={11} className="mr-0.5" /> Girinti +
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleIndent(false, e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-1 cursor-pointer"
+                                title="Girintiyi Geri Al"
+                              >
+                                <Outdent size={11} className="mr-0.5" /> Girinti -
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleParagraphSpacing('add', e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 px-1 cursor-pointer"
+                                title="Paragraflar Arası Boşluk Ekle"
+                              >
+                                + Boşluk
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => handleParagraphSpacing('remove', e)}
+                                className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer text-slate-600 dark:text-slate-300"
+                                title="Boş Satırları Temizle"
+                              >
+                                Boşluk Sil
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Termal Rulo Ayırıcı Çizgileri */}
+                          <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                            <Label className="text-[10px] font-bold uppercase text-slate-500">Rulo Bölücü Çizgiler</Label>
+                            <div className="grid grid-cols-4 gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => insertDividerLine('dashed', e)}
+                                className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="Kesikli Çizgi (---)"
+                              >
+                                - - - Kesikli
                               </button>
-                            ))}
+                              <button
+                                type="button"
+                                onClick={(e) => insertDividerLine('double', e)}
+                                className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="Çift Çizgi (═══)"
+                              >
+                                ═══ Çift
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => insertDividerLine('dotted', e)}
+                                className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="Noktalı Çizgi (···)"
+                              >
+                                ··· Noktalı
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => insertDividerLine('solid', e)}
+                                className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
+                                title="Düz İnce Çizgi (───)"
+                              >
+                                ─── Düz
+                              </button>
+                            </div>
                           </div>
-                        </div>
-
-                        {/* Harf Dönüşümü (Tuş Üzerinde Görsel Geri Bildirim) */}
-                        <div className="space-y-1">
-                          <Label className="text-[10px] font-bold uppercase text-slate-500">Harf Dönüşümü</Label>
-                          <div className="grid grid-cols-3 gap-1">
-                            {/* BÜYÜK HARF (ABC) */}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => transformText('upper', e)}
-                              className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
-                                transformFeedback === 'upper'
-                                  ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                              }`}
-                              title="Tümünü BÜYÜK yap"
-                            >
-                              {transformFeedback === 'upper' ? (
-                                <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
-                                  <Check size={11} className="stroke-[3]" /> ABC
-                                </span>
-                              ) : (
-                                <span>ABC</span>
-                              )}
-                            </Button>
-
-                            {/* küçük harf (abc) */}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => transformText('lower', e)}
-                              className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
-                                transformFeedback === 'lower'
-                                  ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                              }`}
-                              title="Tümünü küçük yap"
-                            >
-                              {transformFeedback === 'lower' ? (
-                                <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
-                                  <Check size={11} className="stroke-[3]" /> abc
-                                </span>
-                              ) : (
-                                <span>abc</span>
-                              )}
-                            </Button>
-
-                            {/* Baş Harf Büyüt (Abc) */}
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={(e) => transformText('title', e)}
-                              className={`h-7 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer p-0 relative overflow-hidden ${
-                                transformFeedback === 'title'
-                                  ? 'bg-teal-600 text-white border-teal-600 shadow-sm ring-2 ring-teal-400/50 scale-95'
-                                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
-                              }`}
-                              title="Baş Harf Büyüt"
-                            >
-                              {transformFeedback === 'title' ? (
-                                <span className="flex items-center justify-center gap-0.5 animate-in zoom-in-75 duration-150 text-[10px] font-black">
-                                  <Check size={11} className="stroke-[3]" /> Abc
-                                </span>
-                              ) : (
-                                <span>Abc</span>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SAYFA 2: LİSTELER, GİRİNTİ, BOŞLUK VE TERMAL RULO ÇİZGİLERİ */}
-                  {paragraphMenuPage === 2 && (
-                    <div className="space-y-2 animate-in fade-in-50 duration-150">
-                      {/* Madde & Liste Biçimleri */}
-                      <div className="space-y-1">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Liste Biçimleri</Label>
-                        <div className="grid grid-cols-5 gap-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={toggleBulletList}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-0 cursor-pointer"
-                            title="Madde İşaretli Liste"
-                          >
-                            <List size={11} className="mr-0.5 text-teal-600" /> Madde
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={toggleNumberedList}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-0 cursor-pointer"
-                            title="Sıralı Sayı Listesi"
-                          >
-                            <ListOrdered size={11} className="mr-0.5 text-teal-600" /> 1. Sıralı
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={toggleChecklist}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-0 cursor-pointer"
-                            title="Onay Kutusu [ ] Ekle"
-                          >
-                            <CheckSquare size={11} className="mr-0.5 text-teal-600" /> [✓] Onay
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => insertListPrefix('arrow', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-0 cursor-pointer"
-                            title="Ok İmi Liste (→)"
-                          >
-                            <ArrowRight size={11} className="mr-0.5 text-teal-600" /> → Ok
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => insertListPrefix('star', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-0 cursor-pointer"
-                            title="Yıldız Liste (★)"
-                          >
-                            <Star size={11} className="mr-0.5 text-teal-600" /> ★ Yıldız
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Girinti & Boşluk Düzeni */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Girinti & Boşluk</Label>
-                        <div className="grid grid-cols-4 gap-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleIndent(true, e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
-                            title="4 Boşluk Girinti Ekle"
-                          >
-                            <Indent size={11} className="mr-0.5" /> Girinti +
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleIndent(false, e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
-                            title="Girintiyi Geri Al"
-                          >
-                            <Outdent size={11} className="mr-0.5" /> Girinti -
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleParagraphSpacing('add', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer"
-                            title="Paragraflar Arası Boşluk Ekle"
-                          >
-                            + Boşluk
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => handleParagraphSpacing('remove', e)}
-                            className="h-7 text-[10px] font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 px-1 cursor-pointer text-slate-600 dark:text-slate-300"
-                            title="Boş Satırları Temizle"
-                          >
-                            Boşluk Sil
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Termal Rulo Ayırıcı Çizgileri */}
-                      <div className="space-y-1 pt-1 border-t border-slate-100 dark:border-slate-800">
-                        <Label className="text-[10px] font-bold uppercase text-slate-500">Rulo Bölücü Çizgiler</Label>
-                        <div className="grid grid-cols-4 gap-1">
-                          <button
-                            type="button"
-                            onClick={(e) => insertDividerLine('dashed', e)}
-                            className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="Kesikli Çizgi (---)"
-                          >
-                            - - - Kesikli
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => insertDividerLine('double', e)}
-                            className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="Çift Çizgi (═══)"
-                          >
-                            ═══ Çift
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => insertDividerLine('dotted', e)}
-                            className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="Noktalı Çizgi (···)"
-                          >
-                            ··· Noktalı
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => insertDividerLine('solid', e)}
-                            className="py-1 px-1 text-[10px] font-mono font-bold rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-teal-50 dark:hover:bg-teal-950/30 hover:border-teal-300 cursor-pointer truncate"
-                            title="Düz İnce Çizgi (───)"
-                          >
-                            ─── Düz
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   {/* Minimalist Sayfa Noktaları (• •) */}
                   <div className="flex items-center justify-center gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setParagraphMenuPage(1)}
+                      onClick={() => changeParagraphPage(1)}
                       className={`h-1.5 rounded-full transition-all cursor-pointer ${
                         paragraphMenuPage === 1 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
                       }`}
@@ -1833,7 +1925,7 @@ export function EditorView(p: EditorViewProps) {
                     />
                     <button
                       type="button"
-                      onClick={() => setParagraphMenuPage(2)}
+                      onClick={() => changeParagraphPage(2)}
                       className={`h-1.5 rounded-full transition-all cursor-pointer ${
                         paragraphMenuPage === 2 ? 'w-4 bg-teal-600' : 'w-1.5 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400'
                       }`}

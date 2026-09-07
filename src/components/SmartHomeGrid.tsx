@@ -145,7 +145,7 @@ export function SmartHomeGrid({ mode, onNavigate, onOpenHistory, onOpenSettings,
 
           const card = (
             <>
-              <div className={`relative ${TOOL_COLORS[toolId]} dark:bg-slate-900 p-2.5 rounded-lg mb-2 shadow-xs`}>
+              <div className={`relative ${TOOL_COLORS[toolId]} dark:bg-slate-800 p-2.5 rounded-lg mb-2 shadow-xs`}>
                 <Icon size={22} className="text-slate-700 dark:text-slate-200" />
                 {soon && (
                   <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-md bg-slate-800 dark:bg-slate-700 text-white text-[8px] font-bold uppercase tracking-wide">
@@ -162,7 +162,7 @@ export function SmartHomeGrid({ mode, onNavigate, onOpenHistory, onOpenSettings,
               key={toolId}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`menu-grid-item ${TOOL_COLORS[toolId]} opacity-70 cursor-not-allowed group shadow-sm border border-slate-200/60 dark:border-slate-800 rounded-lg`}
+              className={`menu-grid-item ${TOOL_COLORS[toolId]} dark:bg-slate-900 opacity-70 cursor-not-allowed group shadow-sm border border-slate-200/60 dark:border-slate-800 rounded-lg`}
             >
               {card}
             </motion.div>
@@ -172,7 +172,7 @@ export function SmartHomeGrid({ mode, onNavigate, onOpenHistory, onOpenSettings,
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onNavigate(view as string)}
-              className={`menu-grid-item ${TOOL_COLORS[toolId]} cursor-pointer group shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200/60 dark:border-slate-800 rounded-lg`}
+              className={`menu-grid-item ${TOOL_COLORS[toolId]} dark:bg-slate-900 cursor-pointer group shadow-sm hover:shadow-md transition-all duration-200 border border-slate-200/60 dark:border-slate-800 rounded-lg`}
             >
               {card}
             </motion.div>
