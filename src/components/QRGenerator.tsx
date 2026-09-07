@@ -312,9 +312,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           scale: 2.8,
           height: barcodeHeight,
           includetext: includeText,
-          textsize: 13,
+          textsize: 10,
           textxalign: 'center',
-          textyoffset: -4,
+          textyoffset: -7,
           paddingwidth: 2
         });
 
@@ -357,9 +357,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           scale: 2.2,
           height: barcodeHeight,
           includetext: true,
-          textsize: 10,
+          textsize: 8.5,
           textxalign: 'center',
-          textyoffset: -3,
+          textyoffset: -6,
           paddingwidth: 2
         });
       } catch (e) {
@@ -370,9 +370,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
             scale: 2.2,
             height: barcodeHeight,
             includetext: true,
-            textsize: 10,
+            textsize: 8.5,
             textxalign: 'center',
-            textyoffset: -3,
+            textyoffset: -6,
             paddingwidth: 2
           });
         } catch (_) {}
@@ -595,9 +595,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           scale: Math.max(2, Math.round(3.0 * scaleFactor)),
           height: Math.round(barcodeHeight * scaleFactor),
           includetext: includeText,
-          textsize: Math.round(13 * scaleFactor),
+          textsize: Math.round(10 * scaleFactor),
           textxalign: 'center',
-          textyoffset: -4,
+          textyoffset: -7,
           paddingwidth: 2
         });
       } catch (err) {
@@ -1286,28 +1286,23 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowDimensionPanel(!showDimensionPanel)}
-                    className="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700 shadow-2xs select-none mb-1.5 transition-all cursor-pointer group"
+                    className="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700 shadow-2xs select-none mb-1.5 transition-all cursor-pointer group whitespace-nowrap"
                     title="Etiket ölçülerini ve tuval boyutunu ayarlamak için tıklayın"
                   >
                     <div className="flex items-center gap-1.5">
                       <Eye size={13} className="text-teal-600 dark:text-teal-400 shrink-0" />
                       <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                        {orientation === 'vertical' ? 'Dikey Önizleme' : 'Yatay Önizleme'}
-                      </span>
-                      <span className="text-[9px] px-1.5 py-0.2 bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-300 font-sans font-bold rounded-md border border-teal-200 dark:border-teal-800">
-                        {isAutoHeight ? 'Otomatik Ölçek' : 'Özel Boyut'}
+                        Önizleme
                       </span>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Ruler size={12} className="text-amber-500 shrink-0" />
-                      <span className="text-[10px] uppercase font-bold text-slate-400">Ölçü:</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[11px] font-bold text-teal-700 dark:text-teal-300">
                         {wCm}cm × {hCm}cm
                       </span>
                       {showDimensionPanel ? (
-                        <ChevronUp size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                        <ChevronUp size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 shrink-0" />
                       ) : (
-                        <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                        <ChevronDown size={13} className="text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200 shrink-0" />
                       )}
                     </div>
                   </button>
@@ -1462,20 +1457,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                       ))}
                     </div>
 
-                    {/* Hızlı Boy Kısayolları ve Otomatik Ölçek Butonu */}
+                    {/* Hızlı Boy Kısayolları */}
                     <div className="flex items-center gap-1 pt-0.5 overflow-x-auto no-scrollbar">
                       <span className="text-[10px] text-slate-500 font-bold shrink-0">Hızlı Boy:</span>
-                      <button
-                        type="button"
-                        onClick={() => setIsAutoHeight(true)}
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold transition-colors shrink-0 cursor-pointer ${
-                          isAutoHeight
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                        }`}
-                      >
-                        Otomatik Ölçek
-                      </button>
                       {[
                         { label: '3 cm', h: 240 },
                         { label: '4 cm', h: 320 },
