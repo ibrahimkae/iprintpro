@@ -49,6 +49,8 @@ import {
   Ruler,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Square,
   CheckSquare,
   RectangleHorizontal,
@@ -117,6 +119,96 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
   const [qrLevel, setQrLevel] = useState<'L' | 'M' | 'Q' | 'H'>('M');
   const [barcodeHeight, setBarcodeHeight] = useState(16);
   const [includeText, setIncludeText] = useState(true);
+
+  // Floating Smart Text Dock (Klavyenin/Alt Menünün Üstünde Dinamik Büyüyen Metin Kutusu)
+  type DockFieldKey = 'topHeader' | 'extraTag' | 'subFooter' | 'priceTag' | 'value';
+  const [activeDockField, setActiveDockField] = useState<DockFieldKey | null>(null);
+  const [keyboardOffset, setKeyboardOffset] = useState<number>(0);
+  const dockTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Mobil klavye açıldığında yüksekliği takip et ve klavyenin üstünde kal
+  useEffect(() => {
+    const handleViewportChange = () => {
+      if (typeof window !== 'undefined' && window.visualViewport) {
+        const vh = window.innerHeight;
+        const actualH = window.visualViewport.height;
+        const topOffset = window.visualViewport.offsetTop;
+        const diff = vh - (actualH + topOffset);
+        setKeyboardOffset(diff > 40 ? Math.round(diff) : 0);
+      }
+    };
+
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      window.visualViewport.addEventListener('scroll', handleViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+        window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+      };
+    }
+  }, []);
+
+  // Textarea'yı metin uzunluğuna göre 1 satırdan 2-3 satıra dinamik genişlet
+  const adjustDockTextareaHeight = () => {
+    if (dockTextareaRef.current) {
+      dockTextareaRef.current.style.height = 'auto';
+      const scrollH = dockTextareaRef.current.scrollHeight;
+      // 1 satır: ~36px, 2 satır: ~56px, 3 satır: ~80px (maksimum 84px)
+      const targetH = Math.min(84, Math.max(36, scrollH));
+      dockTextareaRef.current.style.height = `${targetH}px`;
+    }
+  };
+
+  const getDockFieldValue = (field: DockFieldKey): string => {
+    switch (field) {
+      case 'topHeader': return topHeader;
+      case 'extraTag': return extraTag;
+      case 'subFooter': return subFooter;
+      case 'priceTag': return priceTag;
+      case 'value': return value;
+      default: return '';
+    }
+  };
+
+  const setDockFieldValue = (field: DockFieldKey, val: string) => {
+    switch (field) {
+      case 'topHeader': setTopHeader(val); break;
+      case 'extraTag': setExtraTag(val); break;
+      case 'subFooter': setSubFooter(val); break;
+      case 'priceTag': setPriceTag(val); break;
+      case 'value': 
+        setValue(val);
+        setBarcodeRenderError(null);
+        break;
+    }
+  };
+
+  const DOCK_FIELDS: { key: DockFieldKey; label: string; placeholder: string }[] = [
+    { key: 'topHeader', label: 'Üst Başlık / Ürün Adı', placeholder: 'Örn: Butik Kahve No:4' },
+    { key: 'value', label: codeKind === 'qr' ? 'QR İçeriği / Metin' : 'Barkod Kodu (Veri)', placeholder: 'Barkod veya metin girin...' },
+    { key: 'extraTag', label: 'Ek Bilgi / Beden / Alıcı', placeholder: 'Örn: BEDEN: L / ALICI: Deniz K.' },
+    { key: 'subFooter', label: 'Alt Not / Parti / Adres', placeholder: 'Örn: Raf A-12 / Parti: 08' },
+    { key: 'priceTag', label: 'Fiyat / Vurgu', placeholder: 'Örn: 249.90 ₺' },
+  ];
+
+  const navigateDockField = (direction: 'next' | 'prev') => {
+    if (!activeDockField) return;
+    const currentIndex = DOCK_FIELDS.findIndex(f => f.key === activeDockField);
+    if (currentIndex === -1) return;
+    const newIndex = direction === 'next' 
+      ? (currentIndex + 1) % DOCK_FIELDS.length
+      : (currentIndex - 1 + DOCK_FIELDS.length) % DOCK_FIELDS.length;
+    setActiveDockField(DOCK_FIELDS[newIndex].key);
+  };
+
+  useEffect(() => {
+    if (activeDockField) {
+      setTimeout(() => {
+        adjustDockTextareaHeight();
+        dockTextareaRef.current?.focus();
+      }, 50);
+    }
+  }, [activeDockField]);
 
   // Preset Dialog / Sub-modes for QR
   const [qrPreset, setQrPreset] = useState<'url' | 'wifi' | 'vcard' | 'tel' | 'mail' | 'wa' | 'text'>('url');
@@ -1686,12 +1778,13 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
             </div>
             <Input
               value={value}
+              onFocus={() => setActiveDockField('value')}
               onChange={(e) => {
                 setValue(e.target.value);
                 setBarcodeRenderError(null);
               }}
               placeholder={codeKind === 'qr' ? 'https://... veya metin girin' : 'Örn: 8690123456789 veya ITEM-100'}
-              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-xs h-9 font-mono font-medium"
+              className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-[16px] sm:text-xs h-9 font-mono font-medium"
             />
             {barcodeRenderError && (
               <div className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium pt-0.5">
@@ -1813,36 +1906,40 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                 <Label className="text-[10px] text-slate-500 font-bold">Üst Başlık / Ürün Adı</Label>
                 <Input
                   value={topHeader}
+                  onFocus={() => setActiveDockField('topHeader')}
                   onChange={e => setTopHeader(e.target.value)}
                   placeholder="Örn: Butik Kahve No:4"
-                  className="h-7 text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="h-7 text-[16px] sm:text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
               </div>
               <div>
                 <Label className="text-[10px] text-slate-500 font-bold">Ek Bilgi / Beden / Alıcı</Label>
                 <Input
                   value={extraTag}
+                  onFocus={() => setActiveDockField('extraTag')}
                   onChange={e => setExtraTag(e.target.value)}
                   placeholder="Örn: BEDEN: L / ALICI: Deniz K."
-                  className="h-7 text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="h-7 text-[16px] sm:text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
               </div>
               <div>
                 <Label className="text-[10px] text-slate-500 font-bold">Alt Not / Parti / Adres</Label>
                 <Input
                   value={subFooter}
+                  onFocus={() => setActiveDockField('subFooter')}
                   onChange={e => setSubFooter(e.target.value)}
                   placeholder="Örn: Raf A-12 / Parti: 08"
-                  className="h-7 text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  className="h-7 text-[16px] sm:text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 />
               </div>
               <div>
                 <Label className="text-[10px] text-slate-500 font-bold">Fiyat / Vurgu</Label>
                 <Input
                   value={priceTag}
+                  onFocus={() => setActiveDockField('priceTag')}
                   onChange={e => setPriceTag(e.target.value)}
                   placeholder="Örn: 249.90 ₺"
-                  className="h-7 text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 font-bold"
+                  className="h-7 text-[16px] sm:text-[11px] bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 font-bold"
                 />
               </div>
             </div>
@@ -2294,6 +2391,128 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
         </TabsContent>
       </Tabs>
     </Card>
+
+    {/* Klavyenin / Alt Menünün Üstünde Açılan Akıllı Esnek Metin Düzenleme Çubuğu */}
+    <AnimatePresence>
+      {activeDockField && (
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.96 }}
+          transition={{ duration: 0.16 }}
+          className="fixed left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-teal-500/50 dark:border-teal-500/40 shadow-2xl p-2 sm:p-2.5 space-y-1.5"
+          style={{
+            bottom: keyboardOffset > 0 ? `${keyboardOffset + 8}px` : '58px'
+          }}
+        >
+          {/* Üst Başlık & Kontrol Çubuğu */}
+          <div className="flex items-center justify-between gap-1.5 px-0.5">
+            {/* Aktif Alan Adı */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="w-2 h-2 rounded-full bg-teal-500 shrink-0 animate-pulse" />
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                {DOCK_FIELDS.find(f => f.key === activeDockField)?.label || 'Metin Düzenleme'}
+              </span>
+            </div>
+
+            {/* Alanlar Arası Geçiş ve Aksiyonlar */}
+            <div className="flex items-center gap-1 shrink-0">
+              {/* Önceki Alan */}
+              <button
+                type="button"
+                onClick={() => navigateDockField('prev')}
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Önceki Alan"
+              >
+                <ChevronLeft size={14} />
+              </button>
+              {/* Sonraki Alan */}
+              <button
+                type="button"
+                onClick={() => navigateDockField('next')}
+                className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                title="Sonraki Alan"
+              >
+                <ChevronRight size={14} />
+              </button>
+
+              {/* Temizle */}
+              {getDockFieldValue(activeDockField).length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDockFieldValue(activeDockField, '');
+                    setTimeout(adjustDockTextareaHeight, 10);
+                  }}
+                  className="w-6 h-6 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                  title="Metni Temizle"
+                >
+                  <X size={12} />
+                </button>
+              )}
+
+              {/* Tamam / Kapat */}
+              <button
+                type="button"
+                onClick={() => setActiveDockField(null)}
+                className="h-6 px-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+                title="Düzenlemeyi Tamamla"
+              >
+                <Check size={12} />
+                <span>Tamam</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Dinamik Genişleyen Metin Giriş Alanı (1 ila 3 satır arası otomatik esner, 16px font ile asla zoom yapmaz) */}
+          <div className="relative">
+            <textarea
+              ref={dockTextareaRef}
+              rows={1}
+              value={getDockFieldValue(activeDockField)}
+              onChange={(e) => {
+                setDockFieldValue(activeDockField, e.target.value);
+                adjustDockTextareaHeight();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  navigateDockField('next');
+                }
+              }}
+              placeholder={DOCK_FIELDS.find(f => f.key === activeDockField)?.placeholder}
+              className="w-full text-[16px] sm:text-sm font-medium bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl px-3 py-2 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-500 resize-none transition-all"
+              style={{
+                minHeight: '38px',
+                maxHeight: '88px',
+                lineHeight: '1.4'
+              }}
+            />
+          </div>
+
+          {/* Hızlı Alan Değiştirme Çipleri */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
+            {DOCK_FIELDS.map(f => {
+              const isSelected = f.key === activeDockField;
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  onClick={() => setActiveDockField(f.key)}
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-md whitespace-nowrap transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-teal-600 text-white shadow-2xs'
+                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {f.label.split('/')[0].trim()}
+                </button>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
 
     {/* Alt Sabit Kapsül Gezinme Menüsü - Tam Sığan Kompakt Tasarım */}
     <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[96vw]">

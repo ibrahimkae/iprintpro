@@ -2024,30 +2024,30 @@ export const TemplateStudio: React.FC<TemplateStudioProps> = ({
             <div className="space-y-3">
               <div>
                 <Label className="text-[10px] font-bold text-slate-500 uppercase">Ürün Adı</Label>
-                <Input value={productName} onChange={e => setProductName(e.target.value)} className="h-8 text-xs rounded-lg font-bold" />
+                <Input value={productName} onChange={e => setProductName(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg font-bold" />
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label className="text-[10px] font-bold text-slate-500 uppercase">Eski Fiyat</Label>
-                  <Input value={oldPrice} onChange={e => setOldPrice(e.target.value)} className="h-8 text-xs rounded-lg" />
+                  <Input value={oldPrice} onChange={e => setOldPrice(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg" />
                 </div>
                 <div>
                   <Label className="text-[10px] font-bold text-slate-500 uppercase">Yeni Fiyat</Label>
-                  <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} className="h-8 text-xs rounded-lg font-bold" />
+                  <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg font-bold" />
                 </div>
                 <div>
                   <Label className="text-[10px] font-bold text-slate-500 uppercase">Birim</Label>
-                  <Input value={currency} onChange={e => setCurrency(e.target.value)} className="h-8 text-xs rounded-lg" />
+                  <Input value={currency} onChange={e => setCurrency(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label className="text-[10px] font-bold text-slate-500 uppercase">Rozet / Başlık</Label>
-                  <Input value={promoBadge} onChange={e => setPromoBadge(e.target.value)} className="h-8 text-xs rounded-lg" />
+                  <Input value={promoBadge} onChange={e => setPromoBadge(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg" />
                 </div>
                 <div>
                   <Label className="text-[10px] font-bold text-slate-500 uppercase">Barkod No</Label>
-                  <Input value={productBarcode} onChange={e => setProductBarcode(e.target.value)} className="h-8 text-xs rounded-lg font-mono" />
+                  <Input value={productBarcode} onChange={e => setProductBarcode(e.target.value)} className="h-8 text-[16px] sm:text-xs rounded-lg font-mono" />
                 </div>
               </div>
             </div>

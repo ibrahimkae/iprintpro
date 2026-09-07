@@ -538,7 +538,7 @@ export const BarcodeArchiveManager: React.FC<BarcodeArchiveManagerProps> = ({
                   value={title}
                   onChange={e => setTitle(e.target.value)}
                   placeholder="Örn: Koli #104 - Ofis Kırtasiye & Rulolar"
-                  className="h-8 text-xs font-bold mt-1"
+                  className="h-8 text-[16px] sm:text-xs font-bold mt-1"
                 />
               </div>
 
@@ -591,7 +591,7 @@ export const BarcodeArchiveManager: React.FC<BarcodeArchiveManagerProps> = ({
                     value={code}
                     onChange={e => setCode(e.target.value)}
                     placeholder="Örn: ARC-1004 veya 8690..."
-                    className="h-7 text-xs font-mono font-bold mt-1"
+                    className="h-7 text-[16px] sm:text-xs font-mono font-bold mt-1"
                   />
                 </div>
               </div>
@@ -624,7 +624,7 @@ export const BarcodeArchiveManager: React.FC<BarcodeArchiveManagerProps> = ({
                     value={location}
                     onChange={e => setLocation(e.target.value)}
                     placeholder="Örn: Depo Raf B-3"
-                    className="h-7 text-xs mt-1"
+                    className="h-7 text-[16px] sm:text-xs mt-1"
                   />
                 </div>
               </div>

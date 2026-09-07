@@ -106,6 +106,7 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
   const [isUnderline, setIsUnderline] = useState(false);
+  const [showFloatingTextBar, setShowFloatingTextBar] = useState<boolean>(true);
 
   // Object size controls
   const [objW, setObjW] = useState(0);
@@ -116,6 +117,8 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
   const [keepAspect, setKeepAspect] = useState(true);
 
   const layerCountRef = useRef(0);
+  const layersRef = useRef<LayerItem[]>([]);
+  layersRef.current = layers;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(360);
@@ -147,8 +150,16 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
 
     fc.on('selection:created', (e) => updateSelectedLayer(fc, e.selected?.[0]));
     fc.on('selection:updated', (e) => updateSelectedLayer(fc, e.selected?.[0]));
-    fc.on('selection:cleared', () => { setSelectedLayer(null); });
+    fc.on('selection:cleared', () => { 
+      setSelectedLayer(null); 
+      setShowFloatingTextBar(false);
+    });
     fc.on('object:modified', (e) => syncObjProps(e.target));
+    fc.on('text:changed', (e) => {
+      if (e.target && (e.target as any).type === 'i-text') {
+        setTextValue((e.target as fabric.IText).text || '');
+      }
+    });
 
     setCanvas(fc);
     return () => { fc.dispose(); };
@@ -163,13 +174,18 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
   }, [localWidth, canvasHeight, canvas]);
 
   const updateSelectedLayer = (fc: fabric.Canvas, obj?: fabric.Object) => {
-    if (!obj) { setSelectedLayer(null); return; }
-    const found = layers.find(l => l.fabricObj === obj);
+    if (!obj) { 
+      setSelectedLayer(null); 
+      setShowFloatingTextBar(false);
+      return; 
+    }
+    const found = layersRef.current.find(l => l.fabricObj === obj);
     if (found) {
       setSelectedLayer(found);
       setActiveTab('props');
       syncObjProps(obj);
-      if (obj.type === 'i-text') {
+      if (found.type === 'text' || obj.type === 'i-text') {
+        setShowFloatingTextBar(true);
         const t = obj as fabric.IText;
         setTextValue(t.text || '');
         setTextSize(t.fontSize || 32);
@@ -179,6 +195,16 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
         setIsItalic(t.fontStyle === 'italic');
         setIsUnderline(t.underline || false);
       }
+    } else if (obj.type === 'i-text') {
+      setShowFloatingTextBar(true);
+      const t = obj as fabric.IText;
+      setTextValue(t.text || '');
+      setTextSize(t.fontSize || 32);
+      setTextFont(t.fontFamily || 'Outfit');
+      setTextAlign((t.textAlign as any) || 'center');
+      setIsBold(t.fontWeight === 'bold');
+      setIsItalic(t.fontStyle === 'italic');
+      setIsUnderline(t.underline || false);
     }
   };
 
@@ -205,9 +231,24 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
     canvas.add(fabricObj);
     canvas.setActiveObject(fabricObj);
     canvas.renderAll();
-    setLayers(prev => [...prev, layer]);
+    setLayers(prev => {
+      const updated = [...prev, layer];
+      layersRef.current = updated;
+      return updated;
+    });
     setSelectedLayer(layer);
     setActiveTab('props');
+    if (type === 'text') {
+      setShowFloatingTextBar(true);
+      const t = fabricObj as fabric.IText;
+      setTextValue(t.text || '');
+      setTextSize(t.fontSize || 32);
+      setTextFont(t.fontFamily || 'Outfit');
+      setTextAlign((t.textAlign as any) || 'center');
+      setIsBold(t.fontWeight === 'bold');
+      setIsItalic(t.fontStyle === 'italic');
+      setIsUnderline(t.underline || false);
+    }
   };
 
   const addText = () => {
@@ -292,8 +333,15 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
     if (!canvas) return;
     canvas.remove(layer.fabricObj);
     canvas.renderAll();
-    setLayers(prev => prev.filter(l => l.id !== layer.id));
-    if (selectedLayer?.id === layer.id) setSelectedLayer(null);
+    setLayers(prev => {
+      const updated = prev.filter(l => l.id !== layer.id);
+      layersRef.current = updated;
+      return updated;
+    });
+    if (selectedLayer?.id === layer.id) {
+      setSelectedLayer(null);
+      setShowFloatingTextBar(false);
+    }
   };
 
   const toggleVisibility = (layer: LayerItem) => {
@@ -635,6 +683,205 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Metin Seçildiğinde Alt Menünün Hemen Üstünde Açılan Hızlı Metin Düzenleme Kutucuğu */}
+        <AnimatePresence>
+          {selectedLayer && selectedLayer.type === 'text' && showFloatingTextBar && (
+            <motion.div
+              initial={{ opacity: 0, y: 15, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 15, scale: 0.96 }}
+              transition={{ duration: 0.15 }}
+              className="fixed bottom-[68px] sm:bottom-[74px] left-1/2 -translate-x-1/2 z-40 w-[94vw] max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-200/90 dark:border-slate-800/90 shadow-2xl p-2 sm:p-2.5 space-y-1.5 text-slate-800 dark:text-slate-100"
+            >
+              {/* Üst Satır: Hızlı Metin Düzenleme Girişi + Font Boyutu + Kapat */}
+              <div className="flex items-center gap-1.5">
+                <div className="flex-1 min-w-0">
+                  <input
+                    type="text"
+                    value={textValue}
+                    onChange={(e) => {
+                      setTextValue(e.target.value);
+                      applyTextProp('text', e.target.value);
+                    }}
+                    placeholder="Metin içeriği..."
+                    className="w-full h-7 px-2.5 text-xs font-semibold bg-slate-100 dark:bg-slate-800 border-0 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 dark:text-white"
+                  />
+                </div>
+
+                {/* Font Boyutu Kontrolü */}
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg h-7 px-1 shrink-0 font-mono">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = Math.max(8, textSize - 2);
+                      setTextSize(v);
+                      applyTextProp('fontSize', v);
+                    }}
+                    className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white rounded cursor-pointer"
+                    title="Fontu Küçült"
+                  >
+                    <Minus size={11} />
+                  </button>
+                  <span className="w-6 text-center text-xs font-bold text-teal-700 dark:text-teal-400 select-none">
+                    {textSize}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = Math.min(200, textSize + 2);
+                      setTextSize(v);
+                      applyTextProp('fontSize', v);
+                    }}
+                    className="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white rounded cursor-pointer"
+                    title="Fontu Büyüt"
+                  >
+                    <Plus size={11} />
+                  </button>
+                </div>
+
+                {/* Kapat Butonu */}
+                <button
+                  type="button"
+                  onClick={() => setShowFloatingTextBar(false)}
+                  className="w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer shrink-0 transition-colors"
+                  title="Düzenleme Kutusunu Gizle"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              {/* Alt Satır: Font Ailesi + B/I/U + Hizalama + Katman Aksiyonları */}
+              <div className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar">
+                {/* Font Ailesi */}
+                <div className="shrink-0 w-24 sm:w-28">
+                  <Select
+                    value={textFont}
+                    onValueChange={(v) => {
+                      if (v) {
+                        setTextFont(v);
+                        applyTextProp('fontFamily', v);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-7 text-[11px] font-bold rounded-lg bg-slate-100 dark:bg-slate-800 border-0 dark:text-slate-200 px-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="dark:bg-slate-900 dark:border-slate-800">
+                      {FONT_LIST.map((f) => (
+                        <SelectItem key={f} value={f} className="text-xs font-medium dark:text-slate-200">
+                          {f}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* B, I, U */}
+                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = !isBold;
+                      setIsBold(v);
+                      applyTextProp('fontWeight', v ? 'bold' : 'normal');
+                    }}
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
+                      isBold
+                        ? 'bg-purple-600 text-white shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                    title="Kalın"
+                  >
+                    <Bold size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = !isItalic;
+                      setIsItalic(v);
+                      applyTextProp('fontStyle', v ? 'italic' : 'normal');
+                    }}
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
+                      isItalic
+                        ? 'bg-purple-600 text-white shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                    title="İtalik"
+                  >
+                    <Italic size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = !isUnderline;
+                      setIsUnderline(v);
+                      applyTextProp('underline', v);
+                    }}
+                    className={`w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
+                      isUnderline
+                        ? 'bg-purple-600 text-white shadow-2xs'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                    title="Altı Çizili"
+                  >
+                    <Underline size={11} />
+                  </button>
+                </div>
+
+                {/* Hizalama */}
+                <div className="flex items-center gap-0.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg shrink-0">
+                  {(['left', 'center', 'right'] as const).map((align) => (
+                    <button
+                      key={align}
+                      type="button"
+                      onClick={() => {
+                        setTextAlign(align);
+                        applyTextProp('textAlign', align);
+                      }}
+                      className={`w-6 h-6 rounded flex items-center justify-center transition-all cursor-pointer ${
+                        textAlign === align
+                          ? 'bg-teal-600 text-white shadow-2xs'
+                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                      title={align === 'left' ? 'Sola Hizala' : align === 'center' ? 'Ortala' : 'Sağa Hizala'}
+                    >
+                      {align === 'left' ? <AlignLeft size={11} /> : align === 'center' ? <AlignCenter size={11} /> : <AlignRight size={11} />}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Katman Aksiyonları */}
+                <div className="flex items-center gap-0.5 shrink-0 pl-1 border-l border-slate-200 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => rotateObj(selectedLayer)}
+                    className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                    title="90° Döndür"
+                  >
+                    <RotateCw size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => duplicateLayer(selectedLayer)}
+                    className="w-6 h-6 rounded flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                    title="Kopyala"
+                  >
+                    <Copy size={11} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteLayer(selectedLayer)}
+                    className="w-6 h-6 rounded flex items-center justify-center text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer transition-colors"
+                    title="Metni Sil"
+                  >
+                    <Trash2 size={11} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Alt Sabit Kapsül Gezinme Menüsü (Sadece Ekleme İşlemleri: Metin, Görsel, PDF) */}
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1.5 sm:gap-2 whitespace-nowrap max-w-[95vw] overflow-x-auto no-scrollbar">
