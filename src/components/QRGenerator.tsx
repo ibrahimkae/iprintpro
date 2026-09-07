@@ -727,7 +727,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       const bottomReservedH = Math.round((priceTag || subFooter ? 52 : 16) * scaleFactor);
       const maxW = width - pad * 2 - Math.round(8 * scaleFactor);
       const maxH = canvasHeight - y - bottomReservedH;
-      const drawScale = Math.min(1.2, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -792,7 +792,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       const bottomH = subFooter || extraTag ? Math.round(20 * scaleFactor) : 0;
       const maxW = width - pad * 2 - Math.round(4 * scaleFactor);
       const maxH = canvasHeight - y - bottomH - pad;
-      const drawScale = Math.min(1.2, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -817,7 +817,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
     } else if (designStyle === 'pure') {
       const maxW = width - pad * 2;
       const maxH = canvasHeight - pad * 2;
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -843,7 +843,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       // Barkod Çizimi (maxW ve maxH çift sınırlandırması ile taşmaz)
       const maxW = width - pad * 2 - Math.round(16 * scaleFactor);
       const maxH = Math.max(40, canvasHeight - y - Math.round(40 * scaleFactor));
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -893,7 +893,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       // Barkod
       const maxW = width - pad * 2 - Math.round(20 * scaleFactor);
       const maxH = Math.max(40, canvasHeight - y - Math.round(30 * scaleFactor));
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -928,7 +928,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       // Barkod
       const maxW = width - pad * 2 - Math.round(10 * scaleFactor);
       const maxH = Math.max(40, canvasHeight - y - Math.round(36 * scaleFactor));
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -967,7 +967,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       // Takip Barkodu
       const maxW = width - pad * 2 - Math.round(6 * scaleFactor);
       const maxH = Math.max(40, canvasHeight - y - Math.round(30 * scaleFactor));
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
@@ -1005,14 +1005,20 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
       }
 
       // Code drawing with exact centering and double constraint (maxW & maxH)
-      const maxW = width - pad * 2 - Math.round(12 * scaleFactor);
-      const maxH = Math.max(40, canvasHeight - y - Math.round(30 * scaleFactor));
-      const drawScale = Math.min(1, maxW / codeCanvas.width, maxH / codeCanvas.height);
+      const bottomSpacing = Math.round(((subFooter ? 18 : 0) + (priceTag ? 28 : 0)) * scaleFactor);
+      const maxW = width - pad * 2 - Math.round(8 * scaleFactor);
+      const remainingH = canvasHeight - y - bottomSpacing - Math.round((subFooter || priceTag ? 8 : 2) * scaleFactor);
+      const maxH = Math.max(30, remainingH);
+      const drawScale = Math.min(2.5, maxW / codeCanvas.width, maxH / codeCanvas.height);
       const dw = Math.round(codeCanvas.width * drawScale);
       const dh = Math.round(codeCanvas.height * drawScale);
       const dx = Math.round((width - dw) / 2);
-      ctx.drawImage(codeCanvas, dx, y, dw, dh);
-      y += dh + Math.round(12 * scaleFactor);
+      // Dikeyde tam ortalama (alt metin veya fiyat yoksa kalan alanı dengeler)
+      const dy = (!subFooter && !priceTag) 
+        ? y + Math.max(0, Math.round((maxH - dh) / 2)) 
+        : y;
+      ctx.drawImage(codeCanvas, dx, dy, dw, dh);
+      y = dy + dh + Math.round(12 * scaleFactor);
 
       if (subFooter) {
         ctx.fillStyle = '#000000';
@@ -1226,13 +1232,13 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
             <span className="hidden sm:inline">{activeDraft ? 'Taslağı Güncelle' : 'Taslak'}</span>
           </Button>
 
-          {/* Baskı Önizle & Yazdır Butonu (İptal butonunun hizasında sağa yaslı) */}
+          {/* Yazdır Butonu (İptal butonunun hizasında sağa yaslı) */}
           <Button
             type="button"
             onClick={handleDirectPrintSingle}
             className="rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3.5 h-8 shadow-xs gap-1.5 cursor-pointer"
           >
-            <Printer size={13} /> Baskı Önizle & Yazdır
+            <Printer size={13} /> Yazdır
           </Button>
         </div>
       </div>
@@ -1335,24 +1341,24 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                     </div>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      {/* Genişlik (En) - cm */}
+                      {/* Genişlik - cm */}
                       <div className="space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">
-                          <span>Genişlik (En)</span>
-                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold">
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase whitespace-nowrap gap-1">
+                          <span className="truncate">Genişlik</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold shrink-0">
                             {(labelWidthPreset / 80).toFixed(1).replace(/\.0$/, '')} cm
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => setLabelWidthPreset((prev) => Math.max(160, prev - 40))}
-                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer shrink-0"
                             title="-0.5 cm"
                           >
                             <Minus size={11} />
                           </button>
-                          <div className="flex-1 flex items-center justify-center gap-0.5 font-mono">
+                          <div className="flex items-center justify-center gap-0.5 font-mono min-w-0">
                             <input
                               type="number"
                               step="0.1"
@@ -1361,14 +1367,14 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                                 const cm = parseFloat(e.target.value) || 2;
                                 setLabelWidthPreset(Math.max(160, Math.round(cm * 80)));
                               }}
-                              className="w-12 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50"
+                              className="w-10 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50"
                             />
-                            <span className="text-[10px] text-slate-500 font-bold">cm</span>
+                            <span className="text-[10px] text-slate-500 font-bold shrink-0">cm</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => setLabelWidthPreset((prev) => Math.min(1600, prev + 40))}
-                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer shrink-0"
                             title="+0.5 cm"
                           >
                             <Plus size={11} />
@@ -1376,29 +1382,29 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                         </div>
                       </div>
 
-                      {/* Yükseklik (Boy) - cm */}
+                      {/* Yükseklik - cm */}
                       <div className="space-y-1 bg-slate-50 dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">
-                          <span>Yükseklik (Boy)</span>
-                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold">
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase whitespace-nowrap gap-1">
+                          <span className="truncate">Yükseklik</span>
+                          <span className="text-teal-600 dark:text-teal-400 font-mono font-extrabold shrink-0">
                             {isAutoHeight
                               ? 'Otomatik'
                               : `${(customHeightPx / 80).toFixed(1).replace(/\.0$/, '')} cm`}
                           </span>
                         </div>
-                        <div className="flex items-center gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between gap-1 bg-white dark:bg-slate-900 rounded-md p-1 border border-slate-200 dark:border-slate-800 whitespace-nowrap">
                           <button
                             type="button"
                             onClick={() => {
                               setIsAutoHeight(false);
                               setCustomHeightPx((prev) => Math.max(80, (prev || 400) - 40));
                             }}
-                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer shrink-0"
                             title="-0.5 cm"
                           >
                             <Minus size={11} />
                           </button>
-                          <div className="flex-1 flex items-center justify-center gap-0.5 font-mono">
+                          <div className="flex items-center justify-center gap-0.5 font-mono min-w-0">
                             <input
                               type="number"
                               step="0.1"
@@ -1413,9 +1419,9 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                                   setIsAutoHeight(true);
                                 }
                               }}
-                              className="w-12 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50 placeholder:text-slate-400"
+                              className="w-10 text-center bg-transparent text-xs font-bold text-teal-700 dark:text-teal-400 focus:outline-none border-b border-teal-500/50 placeholder:text-slate-400"
                             />
-                            <span className="text-[10px] text-slate-500 font-bold">cm</span>
+                            <span className="text-[10px] text-slate-500 font-bold shrink-0">cm</span>
                           </div>
                           <button
                             type="button"
@@ -1423,7 +1429,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                               setIsAutoHeight(false);
                               setCustomHeightPx((prev) => Math.min(2400, (prev || 400) + 40));
                             }}
-                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer"
+                            className="p-1 text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded cursor-pointer shrink-0"
                             title="+0.5 cm"
                           >
                             <Plus size={11} />
