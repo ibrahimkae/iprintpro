@@ -597,40 +597,28 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
   ];
 
   return (
-    <div className="space-y-4 max-w-5xl mx-auto pb-24 animate-in fade-in duration-200">
+    <div className="space-y-4 w-full max-w-5xl mx-auto pb-24 animate-in fade-in duration-200">
       {/* 1. Header Bar: Compact, Responsive & Minimalist */}
-      <div className="flex items-center justify-between gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-2xl shadow-xs">
-        {/* Left: Back Button & Title */}
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="w-full flex items-center justify-between gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 sm:px-3 rounded-2xl shadow-xs overflow-hidden">
+        {/* Left: Back Button Only */}
+        <div className="flex items-center gap-2 shrink-0">
           {onBack && (
             <Button
+              type="button"
               variant="ghost"
               onClick={onBack}
               size="sm"
-              className="rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 h-8 px-2.5 cursor-pointer shrink-0"
+              title="Geri Dön"
+              className="rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 h-8 px-2.5 cursor-pointer shrink-0 shadow-xs"
             >
               <ArrowLeft size={14} className="mr-1" /> Geri
             </Button>
           )}
-
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Luggage size={18} />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight truncate">
-                Bavul & Çanta Kartı
-              </h2>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate hidden sm:block">
-                Kayıp önleme, WhatsApp QR & seyahat etiketi
-              </p>
-            </div>
-          </div>
         </div>
 
-        {/* Right: Layout Switcher Options (Expanding on active) & Fixed Print Button */}
+        {/* Right: Layout Switcher Options & Print Button */}
         <div className="flex items-center gap-1.5 shrink-0 ml-auto">
-          {/* Quick Layout Mode Pill Group (Expanding Buttons) */}
+          {/* Quick Layout Mode Pill Group */}
           <div className="flex items-center bg-slate-100/90 dark:bg-slate-800/90 p-0.5 rounded-xl border border-slate-200/70 dark:border-slate-700/70 gap-0.5">
             {layoutOptions.map((opt) => {
               const isSelected = templateType === opt.id;
@@ -641,24 +629,16 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
                   type="button"
                   onClick={() => setTemplateType(opt.id)}
                   title={opt.label}
-                  className={`flex items-center gap-1.5 h-7 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer overflow-hidden whitespace-nowrap ${
+                  className={`flex items-center gap-1 h-7 rounded-lg text-xs font-bold transition-all duration-200 cursor-pointer whitespace-nowrap ${
                     isSelected
-                      ? 'bg-sky-600 text-white px-2.5 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/60 px-2'
+                      ? 'bg-sky-600 text-white px-2 sm:px-2.5 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-slate-700/60 px-1.5 sm:px-2'
                   }`}
                 >
-                  <Icon size={14} className="shrink-0" />
-                  {isSelected && (
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.18 }}
-                      className="overflow-hidden"
-                    >
-                      {opt.label}
-                    </motion.span>
-                  )}
+                  <Icon size={13} className="shrink-0" />
+                  <span className={isSelected ? 'inline text-[11px]' : 'hidden sm:inline text-[11px]'}>
+                    {opt.label}
+                  </span>
                 </button>
               );
             })}
@@ -669,19 +649,14 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
             size="sm"
             onClick={() => handlePrint(true)}
             disabled={isPrinting || !previewUrl}
-            className="h-8 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="h-8 px-2.5 sm:px-3 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 shrink-0 whitespace-nowrap"
           >
             {isPrinting ? (
-              <>
-                <RefreshCw size={13} className="animate-spin" />
-                <span className="hidden sm:inline">Yazdırılıyor...</span>
-              </>
+              <RefreshCw size={13} className="animate-spin" />
             ) : (
-              <>
-                <Printer size={14} />
-                <span>Yazdır</span>
-              </>
+              <Printer size={14} />
             )}
+            <span>Yazdır</span>
           </Button>
         </div>
       </div>
@@ -1065,10 +1040,10 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
             <Button
               type="button"
               onClick={() => setActiveBottomTab('preview')}
-              className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold h-11 rounded-xl shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer"
+              className="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold h-10 rounded-xl shadow-md flex items-center justify-center gap-2 text-xs cursor-pointer"
             >
               <Eye size={15} />
-              Canlı Önizlemeye Geç & Yazdır
+              Önizleme & Yazdır
             </Button>
           </motion.div>
         )}
@@ -1168,24 +1143,24 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
       <canvas ref={canvasRef} className="hidden" />
 
       {/* ALT SABİT KAPSÜL GEZİNME MENÜSÜ (Floating Bottom Capsule Navigation Menu) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)] select-none">
         <button
           type="button"
           onClick={() => setActiveBottomTab('preview')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeBottomTab === 'preview'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/25'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
         >
           <Eye size={14} />
-          <span>Canlı Önizleme</span>
+          <span>Önizleme</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveBottomTab('edit')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeBottomTab === 'edit'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/25'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -1198,7 +1173,7 @@ export const LuggageBagTagStudio: React.FC<LuggageBagTagStudioProps> = ({
         <button
           type="button"
           onClick={() => setActiveBottomTab('types')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeBottomTab === 'types'
               ? 'bg-sky-600 text-white shadow-md shadow-sky-600/25'
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'

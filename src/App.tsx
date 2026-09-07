@@ -259,6 +259,7 @@ function AppShell() {
   const [text, setText] = useState('');
   const [fontSize, setFontSize] = useState(24);
   const [lineHeight, setLineHeight] = useState<number>(1.35);
+  const [letterSpacing, setLetterSpacing] = useState<number>(0);
   const [alignment, setAlignment] = useState<'left' | 'center' | 'right' | 'justify'>('center');
   const [isBold, setIsBold] = useState(false);
   const [isItalic, setIsItalic] = useState(false);
@@ -311,6 +312,7 @@ function AppShell() {
       if (draft.payload?.isItalic !== undefined) setIsItalic(draft.payload.isItalic);
       if (draft.payload?.isUnderline !== undefined) setIsUnderline(draft.payload.isUnderline);
       if (draft.payload?.lineHeight) setLineHeight(draft.payload.lineHeight);
+      if (draft.payload?.letterSpacing !== undefined) setLetterSpacing(draft.payload.letterSpacing);
       setActiveView('editor');
     } else if (draft.category === 'banner') {
       if (draft.payload?.bannerText) setBannerText(draft.payload.bannerText);
@@ -1223,6 +1225,11 @@ function AppShell() {
         return;
       }
 
+      if (letterSpacing) {
+        (ctx as any).letterSpacing = `${letterSpacing}px`;
+      } else {
+        (ctx as any).letterSpacing = '0px';
+      }
       ctx.font = `${isBold ? 'bold ' : ''}${isItalic ? 'italic ' : ''}${isUnderline ? 'underline ' : ''}${fontSize}px ${fontFamily}`;
       const lines = textToRender.split('\n');
       const maxWidth = pageWidth - 20;
@@ -1250,6 +1257,11 @@ function AppShell() {
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, pageWidth, height);
       ctx.fillStyle = 'black';
+      if (letterSpacing) {
+        (ctx as any).letterSpacing = `${letterSpacing}px`;
+      } else {
+        (ctx as any).letterSpacing = '0px';
+      }
       ctx.font = `${isBold ? 'bold ' : ''}${isItalic ? 'italic ' : ''}${isUnderline ? 'underline ' : ''}${fontSize}px ${fontFamily}`;
       ctx.textBaseline = 'top';
       ctx.textAlign = alignment === 'justify' ? 'left' : alignment;
@@ -2333,6 +2345,8 @@ function AppShell() {
               pageWidth={pageWidth}
               lineHeight={lineHeight}
               setLineHeight={setLineHeight}
+              letterSpacing={letterSpacing}
+              setLetterSpacing={setLetterSpacing}
               onGeneratePreview={() => generatePreview()}
               onBack={() => setActiveView('menu')}
               activeDraft={activeDraft}
