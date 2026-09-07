@@ -1,0 +1,16 @@
+services:
+  mariadb:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root_dev_only
+      MARIADB_DATABASE: iprint
+      MARIADB_USER: iprint
+      MARIADB_PASSWORD: iprint_dev_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - iprint_mariadb:/var/lib/mysql
+
+volumes:
+  iprint_mariadb:

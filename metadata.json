@@ -1,0 +1,6 @@
+{
+  "name": "iPrint Pro",
+  "description": "Profesyonel termal yazıcı ve etiket uygulaması. Zebra ZD220/ZD230 kablolu USB (ZPL/TSPL) 10x10, 15x10 cm kargo/ürün etiketleri ve Bluetooth mini termal yazıcı desteği.",
+  "requestFramePermissions": ["bluetooth", "camera", "usb", "serial"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
