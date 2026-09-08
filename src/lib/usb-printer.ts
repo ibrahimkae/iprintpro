@@ -491,37 +491,7 @@ export class UsbPrinterService {
       </html>
     `;
 
-    // Try popup window first
-    let printWindow: Window | null = null;
-    try {
-      printWindow = window.open('', '_blank', 'width=800,height=800');
-    } catch {
-      printWindow = null;
-    }
-
-    if (printWindow && !printWindow.closed) {
-      try {
-        printWindow.document.open();
-        printWindow.document.write(html);
-        printWindow.document.close();
-        setTimeout(() => {
-          try {
-            printWindow?.focus();
-            printWindow?.print();
-            setTimeout(() => {
-              try { printWindow?.close(); } catch {}
-            }, 1500);
-          } catch (e) {
-            logger.warn('Popup print trigger hatası', e);
-          }
-        }, 300);
-        return;
-      } catch (err) {
-        logger.warn('Popup write failed, falling back to hidden iframe', err);
-      }
-    }
-
-    // Fallback: Use Hidden Iframe (Always allowed, no popup blockers, works inside iframes!)
+    // Use Hidden Iframe directly (bypasses all popup blockers, works inside iframes and deployed web apps)
     try {
       const existingIframe = document.getElementById('iprint-system-print-iframe');
       if (existingIframe) {
@@ -537,6 +507,7 @@ export class UsbPrinterService {
       iframe.style.height = '1px';
       iframe.style.border = '0';
       iframe.style.opacity = '0.01';
+      iframe.style.pointerEvents = 'none';
       document.body.appendChild(iframe);
 
       const doc = iframe.contentWindow?.document;
@@ -545,22 +516,44 @@ export class UsbPrinterService {
         doc.write(html);
         doc.close();
 
-        setTimeout(() => {
+        const triggerPrint = () => {
           try {
             iframe.contentWindow?.focus();
             iframe.contentWindow?.print();
           } catch (err) {
-            logger.error('Iframe yazdırma hatası', err);
+            logger.error('Iframe yazdırma tetikleme hatası', err);
           } finally {
             setTimeout(() => {
-              iframe.remove();
-            }, 3000);
+              try { iframe.remove(); } catch {}
+            }, 5000);
           }
-        }, 400);
+        };
+
+        const imgEl = doc.querySelector('img');
+        if (imgEl && !imgEl.complete) {
+          imgEl.onload = () => setTimeout(triggerPrint, 150);
+          imgEl.onerror = () => triggerPrint();
+        } else {
+          setTimeout(triggerPrint, 250);
+        }
       }
-    } catch (fallbackErr) {
-      logger.error('Sistem sürücüsü yazdırma hatası', fallbackErr);
-      alert('Yazdırma penceresi açılamadı. Lütfen tarayıcı izinlerini kontrol edin.');
+    } catch (err) {
+      logger.error('Sistem sürücüsü yazdırma hatası', err);
+      // Fallback to window.open if iframe creation was blocked
+      try {
+        const printWindow = window.open('', '_blank', 'width=800,height=800');
+        if (printWindow) {
+          printWindow.document.open();
+          printWindow.document.write(html);
+          printWindow.document.close();
+          setTimeout(() => {
+            printWindow.focus();
+            printWindow.print();
+          }, 300);
+        }
+      } catch (popupErr) {
+        logger.error('Popup fallback de başarısız', popupErr);
+      }
     }
   }
 

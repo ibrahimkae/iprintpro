@@ -5,13 +5,43 @@ import { logger } from './logger';
 import { BleClient, BleDevice, BleService, BleCharacteristic } from '@capacitor-community/bluetooth-le';
 
 export const PRINTER_SERVICES = [
-  '0000ff00-0000-1000-8000-00805f9b34fb',
-  '0000ae30-0000-1000-8000-00805f9b34fb',
-  '49535343-fe7d-41aa-8956-7278572031d7',
-  'e7e11101-4966-4a5a-a209-00e6057030d9',
+  // 1. HM-10 / CC2540 / POS-58 / Goojprt / MPT / Netum / Milestone / Xprinter (Most common thermal BLE)
+  '0000ffe0-0000-1000-8000-00805f9b34fb',
+  '0000ffe1-0000-1000-8000-00805f9b34fb',
+  // 2. Standard ESC/POS & Label Printers
   '000018f0-0000-1000-8000-00805f9b34fb',
+  '000018f1-0000-1000-8000-00805f9b34fb',
+  // 3. Nordic Semiconductor UART Service (NUS - nRF51/nRF52 label & thermal printers, Phomemo, Niimbot)
+  '6e400001-b5a3-f393-e0a9-e50e24dcca9e',
+  // 4. LuckJingle / GB01 / GB02 / GB03 / PeriPage / iPrint / FunPrint / WalkPrint
+  '0000ff00-0000-1000-8000-00805f9b34fb',
   '0000ff01-0000-1000-8000-00805f9b34fb',
-  '0000fee7-0000-1000-8000-00805f9b34fb'
+  '0000ff02-0000-1000-8000-00805f9b34fb',
+  '0000ff03-0000-1000-8000-00805f9b34fb',
+  '0000ff80-0000-1000-8000-00805f9b34fb',
+  // 5. ISSC Transparent UART (Microchip / BM70 / Many POS-58 & POS-80)
+  '49535343-fe7d-41aa-8956-7278572031d7',
+  // 6. Phomemo T02 / M02 / M110 / D30 / MEMOBIRD
+  '0000ae30-0000-1000-8000-00805f9b34fb',
+  '0000af30-0000-1000-8000-00805f9b34fb',
+  // 7. FFF0 Custom Serial (Chinese mini printers / Cat printers)
+  '0000fff0-0000-1000-8000-00805f9b34fb',
+  '0000fff1-0000-1000-8000-00805f9b34fb',
+  '0000fff2-0000-1000-8000-00805f9b34fb',
+  // 8. Tencent / Rongta / Weixin Hardware Service
+  '0000fee7-0000-1000-8000-00805f9b34fb',
+  '0000fe00-0000-1000-8000-00805f9b34fb',
+  '0000fe59-0000-1000-8000-00805f9b34fb',
+  '0000fef5-0000-1000-8000-00805f9b34fb',
+  // 9. Telink / ST / Microchip Custom BLE Thermal
+  'e7e11101-4966-4a5a-a209-00e6057030d9',
+  'd973f2e0-b19e-11e2-9e96-0800200c9a66',
+  '00001101-0000-1000-8000-00805f9b34fb',
+  // 10. Standard GATT Services (Battery, Device Info)
+  '0000180f-0000-1000-8000-00805f9b34fb',
+  '0000180a-0000-1000-8000-00805f9b34fb',
+  '00001800-0000-1000-8000-00805f9b34fb',
+  '00001801-0000-1000-8000-00805f9b34fb'
 ];
 
 export class PrinterService {
@@ -31,14 +61,18 @@ export class PrinterService {
     isSecureContext: boolean;
     hasNavigatorBt: boolean;
     isIframe: boolean;
+    isAndroid: boolean;
+    isIOS: boolean;
     errorMessage?: string;
   } {
     if (typeof window === 'undefined') {
-      return { supported: false, isSecureContext: false, hasNavigatorBt: false, isIframe: false, errorMessage: 'Ortam desteklenmiyor.' };
+      return { supported: false, isSecureContext: false, hasNavigatorBt: false, isIframe: false, isAndroid: false, isIOS: false, errorMessage: 'Ortam desteklenmiyor.' };
     }
     const isSecure = window.isSecureContext || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     const isIframe = window.self !== window.top;
     const hasNavigatorBt = typeof navigator !== 'undefined' && 'bluetooth' in navigator && !!(navigator as any).bluetooth;
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent);
+    const isIOS = typeof navigator !== 'undefined' && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1));
 
     if (!isSecure) {
       return {
@@ -46,17 +80,24 @@ export class PrinterService {
         isSecureContext: false,
         hasNavigatorBt,
         isIframe,
+        isAndroid,
+        isIOS,
         errorMessage: 'Web Bluetooth sadece HTTPS güvenli bağlantıda çalışır. Lütfen sitenizi https:// ile açın.'
       };
     }
 
     if (!hasNavigatorBt) {
+      const msg = isIOS
+        ? 'iOS (iPhone/iPad) cihazlarda Safari/Chrome Web Bluetooth desteklemez. Bluetooth yazdırmak için App Store\'dan ücretsiz "Bluefy" tarayıcısını kullanabilir veya "Sistem Sürücüsü ile Yazdır" seçeneğiyle AirPrint/kablosuz yazdırabilirsiniz.'
+        : 'Tarayıcınızda Web Bluetooth desteği bulunamadı. Lütfen Android Chrome, Samsung Internet veya Masaüstü Chrome/Edge kullanın.';
       return {
         supported: false,
         isSecureContext: true,
         hasNavigatorBt: false,
         isIframe,
-        errorMessage: 'Tarayıcınızda Web Bluetooth desteği bulunamadı. Lütfen Android Chrome, Edge veya Samsung Internet kullanın.'
+        isAndroid,
+        isIOS,
+        errorMessage: msg
       };
     }
 
@@ -64,7 +105,9 @@ export class PrinterService {
       supported: true,
       isSecureContext: true,
       hasNavigatorBt: true,
-      isIframe
+      isIframe,
+      isAndroid,
+      isIOS
     };
   }
 
@@ -111,8 +154,12 @@ export class PrinterService {
   }
 
   async initialize(): Promise<void> {
-    await BleClient.initialize();
-    logger.info('Bluetooth LE initialized');
+    try {
+      await BleClient.initialize();
+      logger.info('Bluetooth LE initialized');
+    } catch (e) {
+      logger.warn('BleClient initialize notice (proceeding with Web Bluetooth):', e);
+    }
   }
 
   /**
@@ -271,8 +318,8 @@ export class PrinterService {
       }
 
       // Permissions policy / iframe / not allowed error
-      if (errMsg.includes('SecurityError') || errMsg.includes('Permissions-Policy') || errMsg.includes('iframe') || errMsg.includes('gesture')) {
-        this.lastError = 'Tarayıcı güvenlik kısıtlaması: Sayfa bir iframe içindeyse Bluetooth engellenmiş olabilir. Lütfen sayfayı harici bir sekmede doğrudan açın.';
+      if (errMsg.includes('SecurityError') || errMsg.includes('Permissions-Policy') || errMsg.includes('iframe') || errMsg.includes('gesture') || errMsg.includes('disallowed')) {
+        this.lastError = 'Tarayıcı güvenlik kısıtlaması (Iframe/İzin Politikası): Doğrudan Bluetooth donanım erişimi tarayıcı tarafından engellendi. Uygulamayı üst sekmede açabilir veya "Sistem Sürücüsü ile Yazdır" seçeneğini kullanabilirsiniz.';
       } else {
         this.lastError = errMsg;
       }
@@ -283,38 +330,51 @@ export class PrinterService {
   }
 
   private findCharacteristics(): boolean {
+    const KNOWN_PRINTER_CHARS = ['ffe1', 'ff02', '6e400002', '49535343', 'ae01', 'fff2', '2af1', '18f0'];
+
+    let bestWriteChar: { uuid: string; service: string; properties: any } | null = null;
+    let bestNotifyChar: { uuid: string; service: string } | null = null;
+    let fallbackWriteChar: { uuid: string; service: string; properties: any } | null = null;
+    let fallbackNotifyChar: { uuid: string; service: string } | null = null;
+
     for (const service of this.services) {
+      const sUuid = service.uuid.toLowerCase();
+      // Standart generic access/attribute servislerini atla
+      if (sUuid.includes('1800') || sUuid.includes('1801')) continue;
+
       for (const char of service.characteristics) {
+        const cUuid = char.uuid.toLowerCase();
         const props = char.properties;
+
         if (props.write || props.writeWithoutResponse) {
-          if (!this.writeCharacteristic) {
-            this.writeCharacteristic = {
-              uuid: char.uuid,
-              service: service.uuid,
-              properties: props
-            };
-            logger.info(`Write char found: ${char.uuid.slice(4, 8)}`);
+          const isKnown = KNOWN_PRINTER_CHARS.some(k => cUuid.includes(k));
+          if (isKnown && !bestWriteChar) {
+            bestWriteChar = { uuid: char.uuid, service: service.uuid, properties: props };
+          } else if (!fallbackWriteChar) {
+            fallbackWriteChar = { uuid: char.uuid, service: service.uuid, properties: props };
           }
         }
-        
+
         if (props.notify || props.indicate) {
-          if (!this.notifyCharacteristic) {
-            this.notifyCharacteristic = {
-              uuid: char.uuid,
-              service: service.uuid
-            };
-            logger.info(`Notify char found: ${char.uuid.slice(4, 8)}`);
+          const isKnown = KNOWN_PRINTER_CHARS.some(k => cUuid.includes(k)) || cUuid.includes('6e400003') || cUuid.includes('ff03');
+          if (isKnown && !bestNotifyChar) {
+            bestNotifyChar = { uuid: char.uuid, service: service.uuid };
+          } else if (!fallbackNotifyChar) {
+            fallbackNotifyChar = { uuid: char.uuid, service: service.uuid };
           }
         }
       }
     }
+
+    this.writeCharacteristic = bestWriteChar || fallbackWriteChar;
+    this.notifyCharacteristic = bestNotifyChar || fallbackNotifyChar;
 
     if (!this.writeCharacteristic) {
       logger.error('No writable characteristic found');
       return false;
     }
 
-    logger.info(`Active Channel: ${this.writeCharacteristic.uuid.slice(4, 8)}`);
+    logger.info(`Active Channel: ${this.writeCharacteristic.uuid.slice(4, 8)} (${this.writeCharacteristic.uuid})`);
     return true;
   }
 

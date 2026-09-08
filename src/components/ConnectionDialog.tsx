@@ -251,11 +251,31 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
           </div>
         </div>
 
-        {/* Hata Bildirimi */}
+        {/* Hata Bildirimi & Kısıtlamasız Alternatif */}
         {errorMessage && (
-          <div className="p-2.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300 flex items-start gap-2 font-medium">
-            <AlertCircle size={15} className="shrink-0 mt-0.5" />
-            <span className="flex-1">{errorMessage}</span>
+          <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-700 dark:text-rose-300 space-y-2 font-medium">
+            <div className="flex items-start gap-2">
+              <AlertCircle size={15} className="shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+              <span className="flex-1 leading-snug">{errorMessage}</span>
+            </div>
+            {onDirectSystemPrint && (
+              <div className="pt-2 border-t border-rose-200/60 dark:border-rose-800/60 flex items-center justify-between gap-2">
+                <span className="text-[11px] text-rose-600 dark:text-rose-400">
+                  Kısıtlamasız yazdırma alternatifi:
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDirectSystemPrint();
+                    onOpenChange(false);
+                  }}
+                  className="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-lg shrink-0 flex items-center gap-1 shadow-xs cursor-pointer"
+                >
+                  <Monitor size={13} />
+                  <span>Sistem Sürücüsü ile Yazdır</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -345,6 +365,19 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                 </button>
               </div>
             )}
+
+            {/* Mobil & Web Bluetooth İpuçları Rehberi */}
+            <div className="p-2.5 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/70 dark:border-indigo-800/70 rounded-xl text-xs space-y-1">
+              <div className="flex items-center gap-1.5 font-bold text-indigo-800 dark:text-indigo-300 text-[11px]">
+                <Activity size={13} className="shrink-0 text-indigo-600 dark:text-indigo-400" />
+                <span>Mobil & Web Bağlantı İpuçları</span>
+              </div>
+              <p className="text-[10px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                • <strong>Android:</strong> Bluetooth taramasının yazıcıları görebilmesi için telefonunuzun <strong>Konum (GPS)</strong> servisinin açık olması gerekir.<br />
+                • <strong>Yazıcı Durumu:</strong> Cihazınızın açık ve eşleşmeye hazır olduğunu (mavi LED yanıp sönüyor) kontrol edin.<br />
+                • <strong>Kısıtlamasız Yazdırma:</strong> Tarayıcı güvenlik engellerine takılmadan yazdırmak için &quot;Zebra / USB &gt; Sistem Sürücüsü&quot;nü kullanabilirsiniz.
+              </p>
+            </div>
 
             {/* Ana Bluetooth Bağlan Butonu */}
             <Button
