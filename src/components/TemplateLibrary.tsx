@@ -384,6 +384,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                     <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
                       <Button
                         type="button"
+                        variant="ghost"
                         size="sm"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -393,7 +394,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
                             handleDraftSelect(draft);
                           }
                         }}
-                        className="flex-1 h-9 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold gap-1.5 justify-center shadow-none cursor-pointer"
+                        className="flex-1 h-9 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold gap-1.5 justify-center shadow-none cursor-pointer"
                       >
                         <Printer size={13} />
                         <span>Önizle & Bas</span>
@@ -420,46 +421,67 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
         </div>
       )}
 
-      {/* 3. ALT KISMA MİNİ MENÜ (FAVORİLER, TASLAKLAR & MAĞAZA) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1.5">
+      {/* 3. ALT KISMA MİNİ MENÜ (AKTİF OLAN AÇILIR, DİĞERLERİ MİNİMAL İKON GÖRÜNÜR) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
+        {/* Favoriler Butonu */}
         <button
           type="button"
           onClick={() => setViewMode('favorites')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             viewMode === 'favorites'
-              ? 'bg-rose-500 text-white shadow-md shadow-rose-500/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-rose-500 text-white shadow-md shadow-rose-500/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
+          title={`Favoriler (${favorites.length})`}
         >
-          <Heart size={15} fill={viewMode === 'favorites' ? 'currentColor' : 'none'} />
-          <span>Favoriler</span>
-          <span className="text-[10px] opacity-80">({favorites.length})</span>
+          <Heart size={15} fill={viewMode === 'favorites' ? 'currentColor' : 'none'} className="shrink-0" />
+          {viewMode === 'favorites' ? (
+            <span className="flex items-center gap-1 whitespace-nowrap animate-in fade-in duration-200">
+              <span>Favoriler</span>
+              <span className="text-[10px] opacity-85 font-mono font-bold">({favorites.length})</span>
+            </span>
+          ) : (
+            favorites.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+            )
+          )}
         </button>
 
+        {/* Taslaklarım Butonu */}
         <button
           type="button"
           onClick={() => setViewMode('drafts')}
-          className={`flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             viewMode === 'drafts'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
+          title={`Taslaklarım (${draftsList.length})`}
         >
-          <Bookmark size={15} />
-          <span>Taslaklarım</span>
-          <span className="text-[10px] opacity-80">({draftsList.length})</span>
+          <Bookmark size={15} className="shrink-0" />
+          {viewMode === 'drafts' ? (
+            <span className="flex items-center gap-1 whitespace-nowrap animate-in fade-in duration-200">
+              <span>Taslaklarım</span>
+              <span className="text-[10px] opacity-85 font-mono font-bold">({draftsList.length})</span>
+            </span>
+          ) : (
+            draftsList.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            )
+          )}
         </button>
 
         {onNavigateStore && (
           <>
             <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-800 mx-0.5" />
+            {/* Mağaza Butonu */}
             <button
               type="button"
               onClick={onNavigateStore}
-              className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+              className="h-9 w-9 rounded-full text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center cursor-pointer shrink-0"
+              title="Şablon Mağazası"
             >
-              <Store size={15} />
-              <span>Mağaza</span>
+              <Store size={15} className="shrink-0" />
             </button>
           </>
         )}

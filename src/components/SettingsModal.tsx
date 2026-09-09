@@ -105,13 +105,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="flex-1 overflow-y-auto p-3 sm:p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
                 {/* 1. Termal Baskı Koyuluğu (Darkness) */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-850/70 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-2">
+                <div className="p-3.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Zap size={14} className="text-amber-500" />
                       <Label className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Termal Baskı Koyuluğu</Label>
                     </div>
-                    <span className="text-[11px] font-black font-mono bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-md border border-amber-300/60 dark:border-amber-800">
+                    <span className="text-[11px] font-black font-mono bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-md border border-amber-300/60 dark:border-amber-800/80">
                       %{darkness}
                     </span>
                   </div>
@@ -120,7 +120,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-7 w-7 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer" 
+                      className="h-7 w-7 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors" 
                       onClick={() => setDarkness(p => Math.max(0, p - 5))}
                     >
                       <Minus size={12}/>
@@ -131,12 +131,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       min={0} 
                       max={100} 
                       step={5} 
-                      className="flex-1" 
+                      className="flex-1 py-1" 
                     />
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-7 w-7 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer" 
+                      className="h-7 w-7 shrink-0 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors" 
                       onClick={() => setDarkness(p => Math.min(100, p + 5))}
                     >
                       <Plus size={12}/>
@@ -144,14 +144,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
 
                   {/* Hazır Koyuluk Seviyeleri */}
-                  <div className="grid grid-cols-3 gap-1 pt-0.5">
+                  <div className="grid grid-cols-3 gap-1.5 pt-0.5">
                     <button
                       type="button"
                       onClick={() => setDarkness(35)}
-                      className={`text-[10px] py-1 rounded-md font-bold transition-all cursor-pointer ${
+                      className={`text-[10px] py-1.5 px-2 rounded-lg font-bold transition-all cursor-pointer border ${
                         darkness <= 40
-                          ? 'bg-amber-500 text-white shadow-2xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700'
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                          : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       Hafif (%35)
@@ -159,10 +159,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setDarkness(60)}
-                      className={`text-[10px] py-1 rounded-md font-bold transition-all cursor-pointer ${
+                      className={`text-[10px] py-1.5 px-2 rounded-lg font-bold transition-all cursor-pointer border ${
                         darkness > 40 && darkness <= 75
-                          ? 'bg-amber-500 text-white shadow-2xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700'
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                          : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       Normal (%60)
@@ -170,10 +170,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setDarkness(90)}
-                      className={`text-[10px] py-1 rounded-md font-bold transition-all cursor-pointer ${
+                      className={`text-[10px] py-1.5 px-2 rounded-lg font-bold transition-all cursor-pointer border ${
                         darkness > 75
-                          ? 'bg-amber-500 text-white shadow-2xs'
-                          : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-amber-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700'
+                          ? 'bg-amber-500 text-white border-amber-500 shadow-2xs'
+                          : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-slate-750 hover:text-slate-900 dark:hover:text-slate-100 border-slate-200 dark:border-slate-700'
                       }`}
                     >
                       Derin Siyah (%90)
@@ -182,46 +182,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* 2. Kağıt Boşluk & Yırtma Payı */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-850/70 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-2">
+                <div className="p-3.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col justify-between gap-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Sliders size={14} className="text-teal-600 dark:text-teal-400" />
                       <Label className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Kağıt Boşluğu & Yırtma Payı</Label>
                     </div>
-                    <span className="text-[10px] font-bold text-slate-400">
+                    <span className="text-[10px] font-mono font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/70 px-2 py-0.5 rounded-md border border-teal-200 dark:border-teal-800/80">
                       Ön: {prePrintFeed}mm | Son: {postPrintFeed}mm
                     </span>
                   </div>
 
-                  <div className="space-y-1.5">
+                  <div className="space-y-2">
                     {/* Çıktı Başı */}
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 w-16 shrink-0">Başlangıç:</span>
+                      <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 w-16 shrink-0">Başlangıç:</span>
                       <Slider 
                         value={[prePrintFeed]} 
                         onValueChange={(v) => Array.isArray(v) && setPrePrintFeed(v[0])} 
                         min={0} 
                         max={30} 
                         step={1} 
-                        className="flex-1" 
+                        className="flex-1 py-1" 
                       />
-                      <span className="text-[10px] font-mono font-bold w-10 text-right text-teal-700 dark:text-teal-300">
+                      <span className="text-[10px] font-mono font-bold w-12 text-right text-teal-700 dark:text-teal-300">
                         {prePrintFeed} mm
                       </span>
                     </div>
 
                     {/* Yırtma Payı */}
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 w-16 shrink-0">Yırtma Payı:</span>
+                      <span className="text-[10px] font-bold text-slate-600 dark:text-slate-300 w-16 shrink-0">Yırtma Payı:</span>
                       <Slider 
                         value={[postPrintFeed]} 
                         onValueChange={(v) => Array.isArray(v) && setPostPrintFeed(v[0])} 
                         min={0} 
                         max={50} 
                         step={1} 
-                        className="flex-1" 
+                        className="flex-1 py-1" 
                       />
-                      <span className="text-[10px] font-mono font-bold w-10 text-right text-teal-700 dark:text-teal-300">
+                      <span className="text-[10px] font-mono font-bold w-12 text-right text-teal-700 dark:text-teal-300">
                         {postPrintFeed} mm
                       </span>
                     </div>
@@ -229,13 +229,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* 3. Sayfa Boyutu & Hazır Standartlar */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-850/70 rounded-xl border border-slate-200 dark:border-slate-800 md:col-span-2 space-y-2">
+                <div className="p-3.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 md:col-span-2 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Layout size={14} className="text-indigo-600 dark:text-indigo-400" />
                       <Label className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Sayfa Boyutu & Hazır Standartlar</Label>
                     </div>
-                    <span className="text-[10px] font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+                    <span className="text-[10px] font-mono font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/80 px-2 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-800/80">
                       {pageWidth}px × {pageHeight === 0 ? 'Sonsuz' : `${pageHeight}px`}
                     </span>
                   </div>
@@ -262,7 +262,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           className={`h-7 px-1.5 text-[10px] font-bold rounded-lg transition-all truncate border flex items-center justify-center cursor-pointer ${
                             isActive
                               ? 'bg-indigo-600 text-white border-indigo-600 shadow-2xs'
-                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-750'
+                              : 'bg-white dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100'
                           }`}
                           title={preset.name}
                         >
@@ -273,54 +273,86 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
 
                   {/* Özel Piksel Girişi */}
-                  <div className="grid grid-cols-2 gap-2 pt-0.5">
-                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Genişlik:</span>
-                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded cursor-pointer" onClick={() => setPageWidth(p => Math.max(128, p - 8))}><Minus size={10}/></Button>
-                      <Input 
-                        type="number" 
-                        value={pageWidth} 
-                        onChange={e => {
-                          const val = Number(e.target.value) || 384;
-                          setPageWidth(Math.ceil(val / 8) * 8);
-                        }} 
-                        className="h-5 p-0 text-center font-bold text-xs border-none bg-transparent dark:text-white" 
-                      />
-                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded cursor-pointer" onClick={() => setPageWidth(p => p + 8)}><Plus size={10}/></Button>
-                      <span className="text-[9px] text-slate-400 font-mono">px</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
+                    <div className="flex items-center justify-between gap-1.5 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">Genişlik:</span>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer" 
+                          onClick={() => setPageWidth(p => Math.max(128, p - 8))}
+                        >
+                          <Minus size={11}/>
+                        </Button>
+                        <Input 
+                          type="number" 
+                          value={pageWidth} 
+                          onChange={e => {
+                            const val = Number(e.target.value) || 384;
+                            setPageWidth(Math.ceil(val / 8) * 8);
+                          }} 
+                          className="h-6 w-16 p-0 text-center font-bold text-xs border-none bg-transparent text-slate-900 dark:text-white focus:outline-hidden" 
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer" 
+                          onClick={() => setPageWidth(p => p + 8)}
+                        >
+                          <Plus size={11}/>
+                        </Button>
+                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-mono ml-0.5">px</span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0">Uzunluk:</span>
-                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded cursor-pointer" onClick={() => setPageHeight(p => Math.max(0, p - 10))}><Minus size={10}/></Button>
-                      <Input 
-                        type="number" 
-                        value={pageHeight} 
-                        onChange={e => setPageHeight(Number(e.target.value)||0)} 
-                        className="h-5 p-0 text-center font-bold text-xs border-none bg-transparent dark:text-white" 
-                      />
-                      <Button variant="ghost" size="icon" className="h-5 w-5 rounded cursor-pointer" onClick={() => setPageHeight(p => p + 10)}><Plus size={10}/></Button>
-                      <span className="text-[9px] text-slate-400 font-mono">{pageHeight === 0 ? '(0=Sonsuz)' : 'px'}</span>
+                    <div className="flex items-center justify-between gap-1.5 bg-white dark:bg-slate-900 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider shrink-0">Uzunluk:</span>
+                      <div className="flex items-center gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer" 
+                          onClick={() => setPageHeight(p => Math.max(0, p - 10))}
+                        >
+                          <Minus size={11}/>
+                        </Button>
+                        <Input 
+                          type="number" 
+                          value={pageHeight} 
+                          onChange={e => setPageHeight(Number(e.target.value)||0)} 
+                          className="h-6 w-16 p-0 text-center font-bold text-xs border-none bg-transparent text-slate-900 dark:text-white focus:outline-hidden" 
+                        />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-6 w-6 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer" 
+                          onClick={() => setPageHeight(p => p + 10)}
+                        >
+                          <Plus size={11}/>
+                        </Button>
+                        <span className="text-[9.5px] text-slate-400 dark:text-slate-500 font-mono ml-0.5">{pageHeight === 0 ? '(0=Sonsuz)' : 'px'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* 4. Yazıcı Protokolü */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-850/70 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                <div className="p-3.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Cpu size={14} className="text-purple-600 dark:text-purple-400" />
                       <Label className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Yazıcı Protokolü</Label>
                     </div>
-                    <span className="text-[10px] font-bold bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                    <span className="text-[10px] font-bold bg-purple-100 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-md border border-purple-200 dark:border-purple-800/80">
                       {printer.getUserProtocolSetting() === 'auto' ? 'Otomatik' : printer.getUserProtocolSetting() === 'luckjingle' ? 'LuckJingle (GB Serisi)' : 'ESC/POS'}
                     </span>
                   </div>
                   <Select value={printer.getUserProtocolSetting()} onValueChange={(val: any) => printer.setProtocol(val)}>
-                    <SelectTrigger className="rounded-lg h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <SelectTrigger className="rounded-lg h-8 text-xs font-bold bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-lg dark:bg-slate-950 dark:border-slate-800">
+                    <SelectContent className="rounded-xl shadow-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                       <SelectItem value="auto" className="text-xs font-medium dark:text-slate-200">Otomatik Algıla (Önerilen)</SelectItem>
                       <SelectItem value="luckjingle" className="text-xs font-bold text-purple-600 dark:text-purple-400">LuckJingle / iPrint (GB01/02/03/C15)</SelectItem>
                       <SelectItem value="escpos" className="text-xs font-medium dark:text-slate-200">Standart ESC/POS (MTP / POS Termal)</SelectItem>
@@ -329,21 +361,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
 
                 {/* 5. Dithering (Noktalama Algoritması) */}
-                <div className="p-3 bg-slate-50 dark:bg-slate-850/70 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1.5">
+                <div className="p-3.5 bg-slate-50/90 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <Layers size={14} className="text-emerald-600 dark:text-emerald-400" />
                       <Label className="text-[11px] font-bold text-slate-800 dark:text-slate-200">Dithering (Netlik)</Label>
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-[10px] font-mono font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/80 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800/80">
                       Gecikme: {printDelay}ms
                     </span>
                   </div>
                   <Select value={dithering} onValueChange={(v: any) => setDithering(v)}>
-                    <SelectTrigger className="rounded-lg h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <SelectTrigger className="rounded-lg h-8 text-xs font-bold bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl shadow-lg dark:bg-slate-950 dark:border-slate-800">
+                    <SelectContent className="rounded-xl shadow-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                       <SelectItem value="floyd-steinberg" className="text-xs font-medium dark:text-slate-200">Floyd-Steinberg (Yüksek Kalite & Fotoğraf)</SelectItem>
                       <SelectItem value="atkinson" className="text-xs font-medium dark:text-slate-200">Atkinson (Retro & Keskin Kontrast)</SelectItem>
                       <SelectItem value="stucki" className="text-xs font-medium dark:text-slate-200">Stucki (Detaylı Tonlama)</SelectItem>

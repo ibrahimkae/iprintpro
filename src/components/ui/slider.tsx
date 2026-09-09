@@ -29,7 +29,7 @@ function Slider({
     >
       <SliderPrimitive.Control className="relative flex w-full grow items-center h-5">
         <SliderPrimitive.Track
-          className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-slate-200"
+          className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"
         >
           <SliderPrimitive.Indicator
             className="absolute h-full bg-teal-500"
@@ -38,7 +38,7 @@ function Slider({
         {currentValues.map((_, index) => (
           <SliderPrimitive.Thumb
             key={index}
-            className="block h-5 w-5 rounded-full border-2 border-teal-500 bg-white ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-sm"
+            className="block h-5 w-5 rounded-full border-2 border-teal-500 bg-white dark:bg-slate-900 ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-sm"
           />
         ))}
       </SliderPrimitive.Control>

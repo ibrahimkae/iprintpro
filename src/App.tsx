@@ -3039,7 +3039,7 @@ function AppShell() {
           </DialogHeader>
           {/* Scrollable preview area mimicking thermal paper */}
           <div className="bg-slate-100 dark:bg-black/50 p-2.5 rounded-xl flex-1 min-h-0">
-            <div className="bg-white shadow-md rounded-lg overflow-y-auto flex justify-center max-h-[48vh] min-h-[140px] p-1.5 border border-slate-200">
+            <div className="bg-white shadow-md rounded-lg overflow-y-auto flex justify-center max-h-[48vh] min-h-[140px] p-1.5 border border-slate-200 dark:border-slate-800">
               {previewImage ? (
                 <div className="flex flex-col items-center w-full">
                   <img src={previewImage} alt="Preview" className="max-w-full h-auto object-contain [image-rendering:pixelated]" />
@@ -3054,7 +3054,7 @@ function AppShell() {
                <Button
                  variant="outline"
                  size="icon"
-                 className="h-7 w-7 rounded-lg dark:border-slate-700 dark:bg-slate-800 cursor-pointer"
+                 className="h-7 w-7 rounded-lg text-slate-700 dark:text-slate-200 dark:border-slate-700 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                  onClick={() => {
                    if (activeView === 'archive' || activeView === 'templates' || (previewImage && activeView !== 'document')) {
                      rotateCurrentCanvas();

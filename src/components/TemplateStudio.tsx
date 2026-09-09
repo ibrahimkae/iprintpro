@@ -2207,37 +2207,54 @@ export const TemplateStudio: React.FC<TemplateStudioProps> = ({
         </div>
       )}
 
-      {/* Sabit 3'lü Alt Menü Çubuğu (Kompakt, İkonsuz, Galeri - Düzenleme - Önizleme) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl flex items-center gap-1 sm:gap-1.5 max-w-sm w-[92%] sm:w-auto">
+      {/* Sabit 3'lü Alt Menü Çubuğu (Aktif Olan Başlık Gösterir, Diğerleri Minimal İkondur) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         <button
+          type="button"
           onClick={() => setActiveStudioSubTab('gallery')}
-          className={`flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'gallery'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Şablon Galerisi"
         >
-          <span className="whitespace-nowrap">Galeri</span>
+          <LayoutGrid size={15} className="shrink-0" />
+          {activeStudioSubTab === 'gallery' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Galeri</span>
+          )}
         </button>
+
         <button
+          type="button"
           onClick={() => setActiveStudioSubTab('edit')}
-          className={`flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'edit'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Şablon Düzenleyici"
         >
-          <span className="whitespace-nowrap">Düzenleme</span>
+          <Sliders size={15} className="shrink-0" />
+          {activeStudioSubTab === 'edit' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Düzenleme</span>
+          )}
         </button>
+
         <button
+          type="button"
           onClick={() => setActiveStudioSubTab('preview')}
-          className={`flex-1 sm:flex-initial px-3.5 py-2 rounded-lg text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'preview'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Yazdırma Önizleme"
         >
-          <span className="whitespace-nowrap">Önizleme</span>
+          <Eye size={15} className="shrink-0" />
+          {activeStudioSubTab === 'preview' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Önizleme</span>
+          )}
         </button>
       </div>
 

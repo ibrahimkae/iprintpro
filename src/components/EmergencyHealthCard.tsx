@@ -1019,7 +1019,7 @@ export const EmergencyHealthCard: React.FC<EmergencyHealthCardProps> = ({
                     className={`py-2.5 px-2 rounded-xl font-bold text-xs cursor-pointer border transition-all flex flex-col items-center justify-center ${
                       bloodType === b.type
                         ? 'bg-red-600 text-white border-red-600 shadow-md scale-[1.02]'
-                        : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                        : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
                     <span className="text-lg font-black">{b.badge}</span>
@@ -1052,7 +1052,7 @@ export const EmergencyHealthCard: React.FC<EmergencyHealthCardProps> = ({
                       className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col justify-between ${
                         isSelected
                           ? 'border-red-500 bg-red-50/80 dark:bg-red-950/40 ring-1 ring-red-500 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 bg-white dark:bg-slate-900'
+                          : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
                       }`}
                     >
                       <div className="flex items-center justify-between">

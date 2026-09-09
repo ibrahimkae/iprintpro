@@ -1421,7 +1421,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
               <div className="grid grid-cols-4 gap-1">
                 <button
                   onClick={handleInvertColors}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Renkleri Ters Çevir"
                 >
                   <RefreshCw size={14} />
@@ -1430,7 +1430,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleFlipHorizontal}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Yatay Aynala"
                 >
                   <FlipHorizontal size={14} />
@@ -1439,7 +1439,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleFlipVertical}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Dikey Aynala"
                 >
                   <FlipVertical size={14} />
@@ -1448,7 +1448,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleRotate90}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="90° Sağa Döndür"
                 >
                   <RotateCw size={14} />
@@ -2321,7 +2321,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
               <div className="grid grid-cols-4 gap-1">
                 <button
                   onClick={handleInvertColors}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Renkleri Ters Çevir"
                 >
                   <RefreshCw size={14} />
@@ -2330,7 +2330,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleFlipHorizontal}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Yatay Aynala"
                 >
                   <FlipHorizontal size={14} />
@@ -2339,7 +2339,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleFlipVertical}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="Dikey Aynala"
                 >
                   <FlipVertical size={14} />
@@ -2348,7 +2348,7 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
 
                 <button
                   onClick={handleRotate90}
-                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer"
+                  className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold flex flex-col items-center gap-0.5 cursor-pointer transition-colors"
                   title="90° Sağa Döndür"
                 >
                   <RotateCw size={14} />

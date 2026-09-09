@@ -12,7 +12,7 @@ import {
   X, Minus, Plus, Tag, Columns, Sparkles, Eye,
   AlignHorizontalJustifyCenter, AlignVerticalJustifyCenter,
   ShoppingBag, Package, Flame, Star, AlertTriangle, Coffee, Gift, RefreshCw, Check, Ruler,
-  Printer, ChevronDown, ChevronUp, SlidersHorizontal
+  Printer, ChevronDown, ChevronUp, SlidersHorizontal, Percent, Type
 } from 'lucide-react';
 import { logger } from '../lib/logger';
 import { historyStorage } from '../lib/history-storage';
@@ -836,54 +836,70 @@ export function BannerView(p: BannerViewProps) {
         )}
       </Tabs>
 
-      {/* Alt Sabit Kapsül Gezinme Menüsü (Barkod/Klonlama/Sıralı Menüsü Stili) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap">
+      {/* Alt Sabit Kapsül Gezinme Menüsü (Aktif Olan Başlık Gösterir, Diğerleri Minimal İkondur) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         <button
           type="button"
           onClick={() => setActiveTab('shelf')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'shelf'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Raf Etiketi"
         >
-          <span>Raf Etiketi</span>
+          <Tag size={15} className="shrink-0" />
+          {activeTab === 'shelf' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Raf Etiketi</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('campaign')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'campaign'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Kampanya Etiketi"
         >
-          <span>Kampanya</span>
+          <Percent size={15} className="shrink-0" />
+          {activeTab === 'campaign' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Kampanya</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('warehouse')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'warehouse'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Koli & Depo Etiketi"
         >
-          <span>Koli</span>
+          <Package size={15} className="shrink-0" />
+          {activeTab === 'warehouse' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Koli</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('classic')}
-          className={`px-3.5 sm:px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'classic'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Serbest Metin & Banner"
         >
-          <span>Serbest Metin</span>
+          <Type size={15} className="shrink-0" />
+          {activeTab === 'classic' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Serbest Metin</span>
+          )}
         </button>
       </div>
     </motion.div>

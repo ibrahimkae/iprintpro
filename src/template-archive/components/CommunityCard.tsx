@@ -64,7 +64,7 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
       className="group relative break-inside-avoid mb-3 sm:mb-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-2xs hover:shadow-md active:scale-[0.99] transition-all duration-300 cursor-pointer flex flex-col"
     >
       {/* Pure Direct Minimalist Thermal Preview */}
-      <div className="w-full relative flex items-center justify-center p-0 overflow-hidden min-h-[70px]">
+      <div className="w-full relative flex items-center justify-center p-0 overflow-hidden bg-slate-50/80 dark:bg-slate-950/60 min-h-[70px]">
         <ThermalTemplateRenderer
           template={tpl}
           data={tpl.defaultData}
@@ -84,8 +84,8 @@ export const CommunityCard: React.FC<CommunityCardProps> = ({
             }}
             className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-md flex items-center justify-center backdrop-blur-md transition-all active:scale-125 z-20 shadow-md ${
               isLiked
-                ? 'bg-rose-500 text-white border border-white/60 shadow-rose-500/50 scale-105'
-                : 'bg-black/40 hover:bg-rose-500 text-white border border-white/20'
+                ? 'bg-rose-500 text-white border border-rose-300/60 dark:border-rose-400/40 shadow-rose-500/50 scale-105'
+                : 'bg-black/40 dark:bg-slate-900/80 hover:bg-rose-500 text-white border border-white/20 dark:border-slate-700/60'
             }`}
             title="Beğen"
           >

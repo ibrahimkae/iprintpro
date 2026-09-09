@@ -504,10 +504,10 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAdvancedUsb(!showAdvancedUsb)}
-                className="w-full p-2.5 bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+                className="w-full p-2.5 bg-slate-50 dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
               >
                 <span className="flex items-center gap-1.5">
-                  <Settings2 size={14} className="text-teal-600" />
+                  <Settings2 size={14} className="text-teal-600 dark:text-teal-400" />
                   <span>Gelişmiş Ayarlar (Sensör & Port)</span>
                 </span>
                 {showAdvancedUsb ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -517,12 +517,12 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                 <div className="p-3 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 space-y-3">
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Protokol</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Protokol</Label>
                       <Select value={usbProtocol} onValueChange={(v) => setUsbProtocol(v as any)}>
-                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900">
+                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800 text-slate-800 dark:text-slate-200">
                           <SelectItem value="zpl">Zebra ZPL II</SelectItem>
                           <SelectItem value="tspl">TSPL (TSC/Xprinter)</SelectItem>
                           <SelectItem value="escpos">ESC/POS (Fiş)</SelectItem>
@@ -531,12 +531,12 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Baud Hızı (COM)</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Baud Hızı (COM)</Label>
                       <Select value={String(baudRate)} onValueChange={(v) => v && setBaudRate(Number(v))}>
-                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900">
+                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800 text-slate-800 dark:text-slate-200">
                           <SelectItem value="9600">9600 Baud</SelectItem>
                           <SelectItem value="19200">19200 Baud</SelectItem>
                           <SelectItem value="38400">38400 Baud</SelectItem>
@@ -548,12 +548,12 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
 
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Etiket Türü</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Etiket Türü</Label>
                       <Select value={mediaType} onValueChange={(v: any) => setMediaType(v)}>
-                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900">
+                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800 text-slate-800 dark:text-slate-200">
                           <SelectItem value="gap">🏷️ Boşluklu (Gap)</SelectItem>
                           <SelectItem value="continuous">📜 Sürekli Rulo</SelectItem>
                           <SelectItem value="blackmark">⬛ Siyah Çizgili</SelectItem>
@@ -562,12 +562,12 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[10px] uppercase font-bold text-slate-500">Boşluk Payı</Label>
+                      <Label className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">Boşluk Payı</Label>
                       <Select value={String(gapMm)} onValueChange={(v) => v && setGapMm(Number(v))}>
-                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900">
+                        <SelectTrigger className="h-8 text-xs font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="dark:bg-slate-900 dark:border-slate-800 text-slate-800 dark:text-slate-200">
                           <SelectItem value="2">2 mm</SelectItem>
                           <SelectItem value="3">3 mm (Standart)</SelectItem>
                           <SelectItem value="4">4 mm</SelectItem>
@@ -577,13 +577,13 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                   </div>
 
                   {/* Kalibrasyon & Hizalama */}
-                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-850">
+                  <div className="grid grid-cols-2 gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={handleCalibrateSensor}
                       disabled={isCalibrating || !isUsbConnected}
-                      className="h-8 text-[11px] font-bold rounded-lg gap-1"
+                      className="h-8 text-[11px] font-bold rounded-lg gap-1 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                     >
                       <RefreshCw size={12} className={isCalibrating ? 'animate-spin' : ''} />
                       <span>{isCalibrating ? 'Kalibre...' : 'Sensörü Kalibre Et'}</span>
@@ -594,7 +594,7 @@ export const ConnectionDialog: React.FC<ConnectionDialogProps> = ({
                       variant="outline"
                       onClick={handleFeedNextGap}
                       disabled={isFeeding || !isUsbConnected}
-                      className="h-8 text-[11px] font-bold rounded-lg gap-1"
+                      className="h-8 text-[11px] font-bold rounded-lg gap-1 dark:border-slate-700 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                     >
                       <Sparkles size={12} />
                       <span>{isFeeding ? 'Hizalanıyor...' : 'Sonraki Etiket'}</span>

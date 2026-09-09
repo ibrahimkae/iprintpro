@@ -96,11 +96,11 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
       className={`group relative transition-all duration-300 ease-out cursor-pointer w-full flex flex-col justify-between overflow-hidden scroll-mt-16 sm:scroll-mt-20 ${
         activeSelected
           ? 'col-span-full border-2 border-indigo-500 shadow-lg shadow-indigo-500/10 scale-[1.005] z-20 bg-white dark:bg-slate-900 rounded-2xl'
-          : 'col-span-1 shadow-2xs hover:shadow-md active:scale-[0.99] rounded-xl hover:border-slate-300 dark:hover:border-slate-700'
+          : 'col-span-1 shadow-2xs hover:shadow-md active:scale-[0.99] rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900'
       }`}
     >
       {/* Label Canvas Stage - Pure Direct Visual Preview */}
-      <div className="w-full flex items-center justify-center relative overflow-hidden bg-transparent min-h-[70px] transition-all duration-300">
+      <div className="w-full flex items-center justify-center relative overflow-hidden bg-slate-50/80 dark:bg-slate-950/60 min-h-[70px] transition-all duration-300">
         <ThermalTemplateRenderer
           template={template}
           data={template.defaultData}
@@ -120,8 +120,8 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
           }}
           className={`absolute top-1.5 right-1.5 z-30 w-6 h-6 rounded-md flex items-center justify-center backdrop-blur-md transition-all active:scale-125 shadow-md cursor-pointer ${
             isFavorite
-              ? 'bg-rose-500 text-white border border-white/60 shadow-rose-500/50 scale-105'
-              : 'bg-black/40 hover:bg-rose-500 text-white border border-white/20'
+              ? 'bg-rose-500 text-white border border-rose-300/60 dark:border-rose-400/40 shadow-rose-500/50 scale-105'
+              : 'bg-black/40 dark:bg-slate-900/80 hover:bg-rose-500 text-white border border-white/20 dark:border-slate-700/60'
           }`}
           title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
         >
@@ -160,7 +160,7 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
                 e.stopPropagation();
                 onQuickPrint(template);
               }}
-              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/80 shadow-2xs flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
+              className="w-full py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700 shadow-2xs flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer whitespace-nowrap"
               title="Hızlı Yazdır"
             >
               <Printer size={14} />

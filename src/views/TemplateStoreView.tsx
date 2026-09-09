@@ -673,33 +673,43 @@ export function TemplateStoreView({
         </div>
       )}
 
-      {/* 3. ALT KISMA MİNİ MENÜ (SADECE MAĞAZA VE KEŞFET) */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1.5">
+      {/* 3. ALT KISMA MİNİ MENÜ (AKTİF OLAN AÇILIR, DİĞERİ MİNİMAL İKON GÖRÜNÜR) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         <button
           type="button"
           onClick={() => setActiveTab('store')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'store'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/20 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Şablon Mağazası"
         >
-          <Store size={15} />
-          <span>Mağaza</span>
+          <Store size={15} className="shrink-0" />
+          {activeTab === 'store' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Mağaza</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('explore')}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'explore'
-              ? 'bg-purple-600 text-white shadow-md shadow-purple-600/20'
-              : 'text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400'
+              ? 'px-3.5 bg-purple-600 text-white shadow-md shadow-purple-600/20 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
+          title="Keşfet"
         >
-          <Compass size={15} />
-          <span>Keşfet</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+          <Compass size={15} className="shrink-0" />
+          {activeTab === 'explore' ? (
+            <span className="flex items-center gap-1 whitespace-nowrap animate-in fade-in duration-200">
+              <span>Keşfet</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            </span>
+          ) : (
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+          )}
         </button>
       </div>
 

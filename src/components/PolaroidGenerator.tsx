@@ -1027,14 +1027,14 @@ export const PolaroidGenerator: React.FC<PolaroidGeneratorProps> = ({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setSoundEnabled(!soundEnabled)}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 text-xs"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs transition-colors"
                     title={soundEnabled ? 'Sesi Kapat' : 'Sesi Aç'}
                   >
                     {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
                   </button>
                   <button
                     onClick={toggleCameraFacing}
-                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 text-xs flex items-center gap-1 font-semibold"
+                    className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs flex items-center gap-1 font-semibold transition-colors"
                     title="Ön / Arka Kamera Geçişi"
                   >
                     <RefreshCw size={14} />
