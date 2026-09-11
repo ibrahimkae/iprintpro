@@ -1112,7 +1112,7 @@ export const EmergencyHealthCard: React.FC<EmergencyHealthCardProps> = ({
       </AnimatePresence>
 
       {/* Floating Bottom Capsule Navigation Menu */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)]">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         {navTabs.map((tab) => {
           const isActive = activeBottomTab === tab.id;
           const Icon = tab.icon;
@@ -1121,14 +1121,17 @@ export const EmergencyHealthCard: React.FC<EmergencyHealthCardProps> = ({
               key={tab.id}
               type="button"
               onClick={() => setActiveBottomTab(tab.id)}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
                 isActive
-                  ? 'bg-red-600 text-white shadow-md shadow-red-600/25'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+                  : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
               }`}
+              title={tab.label}
             >
-              <Icon size={14} />
-              <span>{tab.label}</span>
+              <Icon size={15} className="shrink-0" />
+              {isActive && (
+                <span className="whitespace-nowrap animate-in fade-in duration-200">{tab.label}</span>
+              )}
             </button>
           );
         })}

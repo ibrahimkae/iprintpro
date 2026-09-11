@@ -1632,45 +1632,54 @@ export const PolaroidGenerator: React.FC<PolaroidGeneratorProps> = ({
       </div>
 
       {/* FLOATING BOTTOM CAPSULE NAVIGATION BAR */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)]">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         <button
           type="button"
           onClick={() => setActiveTab('camera')}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'camera'
-              ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Kamera ile Çek"
         >
-          <Camera size={14} />
-          <span>Kamera</span>
+          <Camera size={15} className="shrink-0" />
+          {activeTab === 'camera' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Kamera</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('upload')}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'upload'
-              ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Galeriden Seç"
         >
-          <Upload size={14} />
-          <span>Galeri</span>
+          <Upload size={15} className="shrink-0" />
+          {activeTab === 'upload' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Galeri</span>
+          )}
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('style')}
           disabled={!sourceImage}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ${
             activeTab === 'style'
-              ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Polaroid Ayarları"
         >
-          <Sliders size={14} />
-          <span>Ayar</span>
+          <Sliders size={15} className="shrink-0" />
+          {activeTab === 'style' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Ayar</span>
+          )}
         </button>
       </div>
     </div>

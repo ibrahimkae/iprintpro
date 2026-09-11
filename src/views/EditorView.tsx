@@ -2313,62 +2313,66 @@ export function EditorView(p: EditorViewProps) {
       </AnimatePresence>
 
       {/* ========================================================================= */}
-      {/* 🧭 FLOATING BOTTOM CAPSULE NAVIGATION BAR (PIXEL CANVAS STYLE) */}
+      {/* 🧭 FLOATING BOTTOM CAPSULE NAVIGATION BAR (STANDART GENİŞLEYEN STİL) */}
       {/* ========================================================================= */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)] select-none">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         {/* Font Butonu */}
         <button
           type="button"
           onClick={() => setActiveBottomMenu((prev) => (prev === 'font' ? null : 'font'))}
-          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeBottomMenu === 'font'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Font Ailesi, Boyut & Biçimlendirme"
         >
-          <Type size={14} className={activeBottomMenu === 'font' ? 'text-white' : 'text-teal-600 dark:text-teal-400'} />
-          <span>Font</span>
+          <Type size={15} className="shrink-0" />
+          {activeBottomMenu === 'font' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Font</span>
+          )}
         </button>
 
         {/* Paragraf Butonu */}
         <button
           type="button"
           onClick={() => setActiveBottomMenu((prev) => (prev === 'paragraph' ? null : 'paragraph'))}
-          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeBottomMenu === 'paragraph'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Hizalama, Satır Aralığı & Paragraf Düzeni"
         >
-          <AlignLeft size={14} className={activeBottomMenu === 'paragraph' ? 'text-white' : 'text-teal-600 dark:text-teal-400'} />
-          <span>Paragraf</span>
+          <AlignLeft size={15} className="shrink-0" />
+          {activeBottomMenu === 'paragraph' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Paragraf</span>
+          )}
         </button>
 
         {/* Araçlar Butonu */}
         <button
           type="button"
           onClick={() => setActiveBottomMenu((prev) => (prev === 'tools' ? null : 'tools'))}
-          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeBottomMenu === 'tools'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
           title="Hızlı Araçlar, Şablonlar & Taslaklar"
         >
-          <Sparkles size={14} className={activeBottomMenu === 'tools' ? 'text-white' : 'text-teal-600 dark:text-teal-400'} />
-          <span>Araçlar</span>
-          {savedDrafts.length > 0 && (
-            <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
-                activeBottomMenu === 'tools'
-                  ? 'bg-white/25 text-white'
-                  : 'bg-teal-100 text-teal-800 dark:bg-teal-900/60 dark:text-teal-300'
-              }`}
-            >
-              {savedDrafts.length}
+          <Sparkles size={15} className="shrink-0" />
+          {activeBottomMenu === 'tools' ? (
+            <span className="flex items-center gap-1 whitespace-nowrap animate-in fade-in duration-200">
+              <span>Araçlar</span>
+              {savedDrafts.length > 0 && (
+                <span className="text-[10px] opacity-85 font-mono font-bold">({savedDrafts.length})</span>
+              )}
             </span>
+          ) : (
+            savedDrafts.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-500" />
+            )
           )}
         </button>
       </div>

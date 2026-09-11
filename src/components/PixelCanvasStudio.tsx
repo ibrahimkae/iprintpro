@@ -2396,52 +2396,55 @@ export function PixelCanvasStudio({ pageWidth = 384, onPrintImage, onBack }: Pix
       </AnimatePresence>
 
       {/* FLOATING BOTTOM CAPSULE NAVIGATION BAR */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)]">
-        {/* Araçlar Butonu (Menüyü doğrudan tuval üzerinde genişletir) */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
+        {/* Araçlar Butonu */}
         <button
           type="button"
           onClick={() => {
             setIsToolsOpen((prev) => !prev);
             setIsDimensionsOpen(false);
           }}
-          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             isToolsOpen
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Çizim Araçlarını Aç / Kapat"
         >
-          <Palette size={14} className={isToolsOpen ? 'text-white' : 'text-indigo-500'} />
-          <span>Araçlar</span>
+          <Palette size={15} className="shrink-0" />
+          {isToolsOpen && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Araçlar</span>
+          )}
         </button>
 
-        {/* Ebat & Şablon Butonu (Doğrudan tuval üzerinde minimalist floating panel açar) */}
+        {/* Ebat & Şablon Butonu */}
         <button
           type="button"
           onClick={() => {
             setIsDimensionsOpen((prev) => !prev);
             setIsToolsOpen(false);
           }}
-          className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer shrink-0 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             isDimensionsOpen
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Tuval Ebatı & Şablon Seç"
         >
-          <Sliders size={13} className={isDimensionsOpen ? 'text-white' : 'text-indigo-500'} />
-          <span>Ebat</span>
+          <Sliders size={15} className="shrink-0" />
+          {isDimensionsOpen && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Ebat</span>
+          )}
         </button>
 
         {/* İçe Aktar Butonu */}
         <button
           type="button"
           onClick={() => setShowImportModal(true)}
-          className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all text-center text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+          className="h-9 w-9 rounded-full text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center cursor-pointer shrink-0"
           title="Görsel İçe Aktar & Rötuşla"
         >
-          <Upload size={13} className="text-indigo-500" />
-          <span>İçe Aktar</span>
+          <Upload size={15} className="shrink-0" />
         </button>
       </div>
     </motion.div>

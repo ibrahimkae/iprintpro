@@ -680,8 +680,8 @@ export function TemplateStoreView({
           onClick={() => setActiveTab('store')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'store'
-              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/20 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Şablon Mağazası"
         >
@@ -696,8 +696,8 @@ export function TemplateStoreView({
           onClick={() => setActiveTab('explore')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeTab === 'explore'
-              ? 'px-3.5 bg-purple-600 text-white shadow-md shadow-purple-600/20 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
           title="Keşfet"
         >
@@ -705,10 +705,10 @@ export function TemplateStoreView({
           {activeTab === 'explore' ? (
             <span className="flex items-center gap-1 whitespace-nowrap animate-in fade-in duration-200">
               <span>Keşfet</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />
             </span>
           ) : (
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-500" />
           )}
         </button>
       </div>

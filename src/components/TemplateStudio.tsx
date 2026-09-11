@@ -2214,8 +2214,8 @@ export const TemplateStudio: React.FC<TemplateStudioProps> = ({
           onClick={() => setActiveStudioSubTab('gallery')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'gallery'
-              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Şablon Galerisi"
         >
@@ -2230,8 +2230,8 @@ export const TemplateStudio: React.FC<TemplateStudioProps> = ({
           onClick={() => setActiveStudioSubTab('edit')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'edit'
-              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Şablon Düzenleyici"
         >
@@ -2246,8 +2246,8 @@ export const TemplateStudio: React.FC<TemplateStudioProps> = ({
           onClick={() => setActiveStudioSubTab('preview')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioSubTab === 'preview'
-              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
           title="Yazdırma Önizleme"
         >

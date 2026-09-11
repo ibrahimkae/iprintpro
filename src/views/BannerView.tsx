@@ -669,24 +669,28 @@ export function BannerView(p: BannerViewProps) {
                     <div>
                       <Label className="text-[10px] uppercase font-bold text-slate-500">Görsel Tema</Label>
                       <div className="flex gap-1 mt-1">
-                        <Button
+                        <button
                           type="button"
-                          size="sm"
-                          variant={campTheme === 'inverted' ? 'default' : 'outline'}
                           onClick={() => setCampTheme('inverted')}
-                          className="flex-1 h-7 text-[10px] font-bold"
+                          className={`flex-1 h-7 text-[10px] font-bold rounded-md transition-all border cursor-pointer ${
+                            campTheme === 'inverted'
+                              ? 'bg-slate-900 dark:bg-slate-800 text-white border-slate-900 dark:border-slate-700 shadow-2xs'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          }`}
                         >
                           Siyah Zemin (Negatif)
-                        </Button>
-                        <Button
+                        </button>
+                        <button
                           type="button"
-                          size="sm"
-                          variant={campTheme === 'white' ? 'default' : 'outline'}
                           onClick={() => setCampTheme('white')}
-                          className="flex-1 h-7 text-[10px] font-bold"
+                          className={`flex-1 h-7 text-[10px] font-bold rounded-md transition-all border cursor-pointer ${
+                            campTheme === 'white'
+                              ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
+                          }`}
                         >
                           Beyaz Zemin
-                        </Button>
+                        </button>
                       </div>
                     </div>
 

@@ -1370,7 +1370,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
         {/* 1. OLUŞTURUCU TAB */}
         <TabsContent value="create" className="space-y-2.5 pt-0">
           {/* Canlı Görsel Önizleme Kartı (EN BAŞTA) */}
-          <div className="p-2.5 bg-slate-100 dark:bg-slate-800/60 rounded-xl flex flex-col items-center justify-center">
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center">
             <div className="w-full max-w-[360px] flex flex-col items-center">
               {/* Tek Satır Canlı Önizleme & Ölçü Başlığı - Tıklanabilir Tuval Ölçülendirme Butonu */}
               {(() => {
@@ -1384,7 +1384,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowDimensionPanel(!showDimensionPanel)}
-                    className="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700 shadow-2xs select-none mb-1.5 transition-all cursor-pointer group whitespace-nowrap"
+                    className="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-mono border border-slate-200 dark:border-slate-700 shadow-2xs select-none mb-1.5 transition-all cursor-pointer group whitespace-nowrap"
                     title="Etiket ölçülerini ve tuval boyutunu ayarlamak için tıklayın"
                   >
                     <div className="flex items-center gap-1.5">
@@ -1589,7 +1589,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
 
               {/* Termal Kağıt Görünümü */}
               {previewDataUrl ? (
-                <div className="p-1.5 bg-slate-200 dark:bg-slate-900 rounded-none shadow-2xs border border-slate-300 dark:border-slate-700 flex items-center justify-center w-full overflow-hidden">
+                <div className="p-1.5 bg-slate-200 dark:bg-slate-950 rounded-none shadow-2xs border border-slate-300 dark:border-slate-800 flex items-center justify-center w-full overflow-hidden">
                   <img
                     src={previewDataUrl}
                     alt="Canlı Termal Etiket Önizleme"
@@ -1613,7 +1613,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
             <button
               type="button"
               onClick={() => setIsConfigOpen(!isConfigOpen)}
-              className="w-full flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/80 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700/80 font-bold text-xs transition-all cursor-pointer shadow-2xs"
+              className="w-full flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-800 font-bold text-xs transition-all cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center font-bold">
@@ -1645,53 +1645,61 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           {/* Kod Türü ve Oryantasyon Çubuğu */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {/* Kod Türü (QR vs Barkod) */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-              <Button
+            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg">
+              <button
                 type="button"
-                variant={codeKind === 'barcode' ? 'default' : 'ghost'}
-                size="sm"
                 onClick={() => {
                   setCodeKind('barcode');
                   handleBarcodeTypeChange('ean13');
                 }}
-                className="gap-1.5 text-xs font-bold h-8 rounded-md"
+                className={`flex items-center justify-center gap-1.5 text-xs font-bold h-8 rounded-md transition-all cursor-pointer ${
+                  codeKind === 'barcode'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs border border-slate-200/80 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
               >
                 <Barcode size={14} /> 1D / 2D Barkod
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant={codeKind === 'qr' ? 'default' : 'ghost'}
-                size="sm"
                 onClick={() => {
                   setCodeKind('qr');
                   if (!value.startsWith('http')) setValue('https://iprint.pro');
                 }}
-                className="gap-1.5 text-xs font-bold h-8 rounded-md"
+                className={`flex items-center justify-center gap-1.5 text-xs font-bold h-8 rounded-md transition-all cursor-pointer ${
+                  codeKind === 'qr'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs border border-slate-200/80 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
               >
                 <QrCode size={14} /> 2D QR Kod
-              </Button>
+              </button>
             </div>
 
             {/* Yönlendirme (Dikey vs. Yatay) */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
-              <Button
+            <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg">
+              <button
                 type="button"
-                variant={orientation === 'vertical' ? 'default' : 'ghost'}
-                size="sm"
                 onClick={() => handleSelectOrientation('vertical')}
-                className="gap-1.5 text-xs font-bold h-8 rounded-md"
+                className={`flex items-center justify-center gap-1.5 text-xs font-bold h-8 rounded-md transition-all cursor-pointer ${
+                  orientation === 'vertical'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs border border-slate-200/80 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
               >
                 ↕️ Dikey (Portrait)
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant={orientation === 'horizontal' ? 'default' : 'ghost'}
-                size="sm"
                 onClick={() => handleSelectOrientation('horizontal')}
-                className="gap-1.5 text-xs font-bold h-8 rounded-md"
+                className={`flex items-center justify-center gap-1.5 text-xs font-bold h-8 rounded-md transition-all cursor-pointer ${
+                  orientation === 'horizontal'
+                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-2xs border border-slate-200/80 dark:border-slate-700'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
               >
                 ↔️ Yatay (Landscape)
-              </Button>
+              </button>
             </div>
           </div>
 
@@ -1750,16 +1758,18 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                 const Icon = p.icon;
                 const isSelected = qrPreset === p.id;
                 return (
-                  <Button
+                  <button
                     key={p.id}
                     type="button"
-                    variant={isSelected ? 'default' : 'outline'}
-                    size="sm"
                     onClick={() => setQrPreset(p.id as any)}
-                    className="h-7 text-[11px] px-2.5 rounded-lg whitespace-nowrap font-medium gap-1 shrink-0"
+                    className={`flex items-center h-7 text-[11px] px-2.5 rounded-lg whitespace-nowrap font-medium gap-1 shrink-0 transition-all cursor-pointer border ${
+                      isSelected
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-2xs font-bold'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
                   >
                     <Icon size={12} /> {p.label}
-                  </Button>
+                  </button>
                 );
               })}
             </div>
@@ -1819,34 +1829,40 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
               <div className="space-y-1">
                 <Label className="text-[10px] uppercase font-bold text-slate-500">Barkod Açısı (Döndürme)</Label>
                 <div className="flex gap-1">
-                  <Button
+                  <button
                     type="button"
-                    size="sm"
-                    variant={barcodeRotation === 0 ? 'default' : 'outline'}
                     onClick={() => setBarcodeRotation(0)}
-                    className="flex-1 h-8 text-[10px] font-bold px-1 rounded-lg"
+                    className={`flex-1 h-8 text-[10px] font-bold px-1 rounded-lg transition-all border cursor-pointer ${
+                      barcodeRotation === 0
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
                   >
                     0° Düz
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    size="sm"
-                    variant={barcodeRotation === 90 ? 'default' : 'outline'}
                     onClick={() => setBarcodeRotation(90)}
-                    className="flex-1 h-8 text-[10px] font-bold px-1 rounded-lg"
+                    className={`flex-1 h-8 text-[10px] font-bold px-1 rounded-lg transition-all border cursor-pointer ${
+                      barcodeRotation === 90
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
                     title="Dikeye tam oturan 90 derece dikey barkod"
                   >
                     90° Dikey
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     type="button"
-                    size="sm"
-                    variant={barcodeRotation === 270 ? 'default' : 'outline'}
                     onClick={() => setBarcodeRotation(270)}
-                    className="flex-1 h-8 text-[10px] font-bold px-1 rounded-lg"
+                    className={`flex-1 h-8 text-[10px] font-bold px-1 rounded-lg transition-all border cursor-pointer ${
+                      barcodeRotation === 270
+                        ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                    }`}
                   >
                     270° Ters
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -1954,31 +1970,35 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
                     { id: 'dashed', label: 'Kesikli' },
                     { id: 'badge', label: 'Rozet' }
                   ].map(b => (
-                    <Button
+                    <button
                       key={b.id}
                       type="button"
-                      size="sm"
-                      variant={borderStyle === b.id ? 'default' : 'outline'}
                       onClick={() => setBorderStyle(b.id as any)}
-                      className="h-6 text-[9px] px-2 rounded-md font-bold"
+                      className={`h-6 text-[9px] px-2 rounded-md font-bold transition-all border cursor-pointer ${
+                        borderStyle === b.id
+                          ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                          : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                      }`}
                     >
                       {b.label}
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
                 <Label className="text-[10px] font-bold text-slate-500">Metin Göster:</Label>
-                <Button
+                <button
                   type="button"
-                  size="sm"
-                  variant={includeText ? 'default' : 'outline'}
                   onClick={() => setIncludeText(!includeText)}
-                  className="h-6 text-[9px] px-2 rounded-md font-bold"
+                  className={`h-6 text-[9px] px-2 rounded-md font-bold transition-all border cursor-pointer ${
+                    includeText
+                      ? 'bg-teal-600 text-white border-teal-600 shadow-2xs'
+                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
                 >
                   {includeText ? 'Açık' : 'Kapalı'}
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -2249,7 +2269,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
               variant="outline"
               size="sm"
               onClick={() => applyBatchPreset('stock')}
-              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 gap-1 shrink-0"
+              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 gap-1 shrink-0"
             >
               <Package size={11} className="text-amber-600" /> Stok (STK-1001..)
             </Button>
@@ -2258,7 +2278,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
               variant="outline"
               size="sm"
               onClick={() => applyBatchPreset('box')}
-              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 gap-1 shrink-0"
+              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 gap-1 shrink-0"
             >
               <Boxes size={11} className="text-teal-600" /> Koli (KOL-001..)
             </Button>
@@ -2267,7 +2287,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
               variant="outline"
               size="sm"
               onClick={() => applyBatchPreset('shelf')}
-              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 gap-1 shrink-0"
+              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 gap-1 shrink-0"
             >
               <MapPin size={11} className="text-indigo-600" /> Raf (RAF-A10..)
             </Button>
@@ -2276,7 +2296,7 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
               variant="outline"
               size="sm"
               onClick={() => applyBatchPreset('num')}
-              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 gap-1 shrink-0"
+              className="h-6 text-[10px] px-2 rounded-md font-bold bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 gap-1 shrink-0"
             >
               <Hash size={11} className="text-rose-600" /> Numaratör
             </Button>
@@ -2285,25 +2305,25 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div>
               <Label className="text-[10px] font-bold text-slate-500">Önek (Prefix)</Label>
-              <Input value={batchPrefix} onChange={e => setBatchPrefix(e.target.value)} className="h-8 text-xs font-mono" />
+              <Input value={batchPrefix} onChange={e => setBatchPrefix(e.target.value)} className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700" />
             </div>
             <div>
               <Label className="text-[10px] font-bold text-slate-500">Başlangıç No</Label>
-              <Input type="number" value={batchStart} onChange={e => setBatchStart(Number(e.target.value) || 1)} className="h-8 text-xs font-mono" />
+              <Input type="number" value={batchStart} onChange={e => setBatchStart(Number(e.target.value) || 1)} className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700" />
             </div>
             <div>
               <Label className="text-[10px] font-bold text-slate-500">Üretim Adedi</Label>
-              <Input type="number" min={1} max={100} value={batchCount} onChange={e => setBatchCount(Math.min(100, Math.max(1, Number(e.target.value) || 1)))} className="h-8 text-xs font-mono" />
+              <Input type="number" min={1} max={100} value={batchCount} onChange={e => setBatchCount(Math.min(100, Math.max(1, Number(e.target.value) || 1)))} className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700" />
             </div>
             <div>
               <Label className="text-[10px] font-bold text-slate-500">Sonek (Suffix)</Label>
-              <Input value={batchSuffix} onChange={e => setBatchSuffix(e.target.value)} className="h-8 text-xs font-mono" />
+              <Input value={batchSuffix} onChange={e => setBatchSuffix(e.target.value)} className="h-8 text-xs font-mono bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700" />
             </div>
           </div>
 
           {/* Seçilen Seri Elemanı Canlı Önizleme */}
           {selectedBatchItem && (
-            <div className="p-3 bg-slate-100 dark:bg-slate-800/60 rounded-xl flex flex-col items-center">
+            <div className="p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center">
               <div className="w-full max-w-[280px]">
                 <div className="text-[9px] font-mono text-slate-400 mb-1 flex items-center justify-between">
                   <span className="flex items-center gap-1"><Eye size={11} /> Seçilen Seri Önizlemesi</span>
@@ -2533,58 +2553,74 @@ export const QRGenerator: React.FC<QRGeneratorProps> = ({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 15, scale: 0.96 }}
           transition={{ duration: 0.16 }}
-          className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[96vw]"
+          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]"
         >
+          {/* Oluştur Butonu */}
           <button
             type="button"
             onClick={() => setActiveTab('create')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
               activeTab === 'create'
-                ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+                : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
+            title="Barkod & QR Oluştur"
           >
-            <Barcode size={14} className="shrink-0" />
-            <span>Oluştur</span>
+            <Barcode size={15} className="shrink-0" />
+            {activeTab === 'create' && (
+              <span className="whitespace-nowrap animate-in fade-in duration-200">Oluştur</span>
+            )}
           </button>
 
+          {/* Tara Butonu */}
           <button
             type="button"
             onClick={() => setActiveTab('scan')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
               activeTab === 'scan'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+                : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
+            title="Kamera ile Tara"
           >
-            <Camera size={14} className="shrink-0" />
-            <span>Tara</span>
+            <Camera size={15} className="shrink-0" />
+            {activeTab === 'scan' && (
+              <span className="whitespace-nowrap animate-in fade-in duration-200">Tara</span>
+            )}
           </button>
 
+          {/* Sıralı / Seri Butonu */}
           <button
             type="button"
             onClick={() => setActiveTab('batch')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
               activeTab === 'batch'
-                ? 'bg-amber-600 text-white shadow-md shadow-amber-600/25'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+                : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
+            title="Sıralı / Seri Barkod"
           >
-            <Layers size={14} className="shrink-0" />
-            <span>Sıralı</span>
+            <Layers size={15} className="shrink-0" />
+            {activeTab === 'batch' && (
+              <span className="whitespace-nowrap animate-in fade-in duration-200">Sıralı</span>
+            )}
           </button>
 
+          {/* Arşiv Butonu */}
           <button
             type="button"
             onClick={() => setActiveTab('archive')}
-            className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+            className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
               activeTab === 'archive'
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+                ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+                : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
             }`}
+            title="Barkod Arşivi"
           >
-            <Boxes size={14} className="shrink-0" />
-            <span>Arşiv</span>
+            <Boxes size={15} className="shrink-0" />
+            {activeTab === 'archive' && (
+              <span className="whitespace-nowrap animate-in fade-in duration-200">Arşiv</span>
+            )}
           </button>
         </motion.div>
       )}

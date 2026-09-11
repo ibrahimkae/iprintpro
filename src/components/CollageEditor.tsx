@@ -522,7 +522,7 @@ export const CollageEditor: React.FC<CollageEditorProps> = ({
           className={`w-full flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer border shadow-2xs ${
             showCanvasSizePanel
               ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
-              : 'bg-white dark:bg-slate-850 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+              : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
           }`}
           title="Tuval Ölçüsünü Değiştir"
         >

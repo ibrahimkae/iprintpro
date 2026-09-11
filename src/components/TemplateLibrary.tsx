@@ -429,8 +429,8 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
           onClick={() => setViewMode('favorites')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             viewMode === 'favorites'
-              ? 'px-3.5 bg-rose-500 text-white shadow-md shadow-rose-500/25 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
           title={`Favoriler (${favorites.length})`}
         >
@@ -442,7 +442,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
             </span>
           ) : (
             favorites.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-500" />
             )
           )}
         </button>
@@ -453,8 +453,8 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
           onClick={() => setViewMode('drafts')}
           className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             viewMode === 'drafts'
-              ? 'px-3.5 bg-indigo-600 text-white shadow-md shadow-indigo-600/25 gap-1.5'
-              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative'
           }`}
           title={`Taslaklarım (${draftsList.length})`}
         >
@@ -466,7 +466,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
             </span>
           ) : (
             draftsList.length > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-500" />
             )
           )}
         </button>
@@ -478,7 +478,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
             <button
               type="button"
               onClick={onNavigateStore}
-              className="h-9 w-9 rounded-full text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center cursor-pointer shrink-0"
+              className="h-9 w-9 rounded-full text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all flex items-center justify-center cursor-pointer shrink-0"
               title="Şablon Mağazası"
             >
               <Store size={15} className="shrink-0" />

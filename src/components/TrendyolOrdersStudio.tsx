@@ -1907,21 +1907,24 @@ export function TrendyolOrdersStudio(props: TrendyolOrdersStudioProps) {
       )}
 
       {/* FLOATING BOTTOM CAPSULE NAVIGATION BAR */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 sm:p-1.5 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 sm:gap-1.5 whitespace-nowrap max-w-[calc(100vw-1.5rem)]">
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-1 rounded-full border border-slate-200/90 dark:border-slate-800/90 shadow-xl flex items-center gap-1 select-none max-w-[calc(100vw-1.5rem)]">
         <button
           type="button"
           onClick={() => {
             setActiveStudioTab('orders');
             setVisibleCount(PAGE_SIZE);
           }}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioTab === 'orders'
-              ? 'bg-orange-600 text-white shadow-md shadow-orange-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Bekleyen Siparişler"
         >
-          <Package size={14} />
-          <span>Siparişler</span>
+          <Package size={15} className="shrink-0" />
+          {activeStudioTab === 'orders' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Siparişler</span>
+          )}
         </button>
 
         <button
@@ -1930,14 +1933,17 @@ export function TrendyolOrdersStudio(props: TrendyolOrdersStudioProps) {
             setActiveStudioTab('shipped');
             setVisibleCount(PAGE_SIZE);
           }}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioTab === 'shipped'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Kargodaki Siparişler"
         >
-          <Truck size={14} />
-          <span>Kargoda</span>
+          <Truck size={15} className="shrink-0" />
+          {activeStudioTab === 'shipped' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Kargoda</span>
+          )}
         </button>
 
         <button
@@ -1946,14 +1952,17 @@ export function TrendyolOrdersStudio(props: TrendyolOrdersStudioProps) {
             setAssemblyInitialData(undefined);
             setActiveStudioTab('assembly');
           }}
-          className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`h-9 rounded-full text-xs font-extrabold transition-all duration-200 flex items-center justify-center cursor-pointer shrink-0 ${
             activeStudioTab === 'assembly'
-              ? 'bg-teal-600 text-white shadow-md shadow-teal-600/25'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800'
+              ? 'px-3.5 bg-teal-600 text-white shadow-md shadow-teal-600/25 gap-1.5'
+              : 'w-9 text-slate-600 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-slate-800'
           }`}
+          title="Montaj & Kılavuz Modu"
         >
-          <Wrench size={14} />
-          <span>Kılavuz</span>
+          <Wrench size={15} className="shrink-0" />
+          {activeStudioTab === 'assembly' && (
+            <span className="whitespace-nowrap animate-in fade-in duration-200">Kılavuz</span>
+          )}
         </button>
       </div>
     </div>
